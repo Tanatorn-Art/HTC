@@ -65,8 +65,11 @@ const ReportFilterForm = ({ onSearch }: Props) => {
             onChange={(e) => setDepartmentId(e.target.value)}
           >
             <option value="">-- เลือกแผนก --</option>
-            {departments.map((d) => (
-              <option key={d.id} value={d.id}>
+            {departments.map((d, idx) => (
+              <option
+                key={d.id || `dept-${idx}`} 
+                value={d.id}
+              >
                 {d.name}
               </option>
             ))}
@@ -80,15 +83,21 @@ const ReportFilterForm = ({ onSearch }: Props) => {
             onChange={(e) => setEmployeeId(e.target.value)}
           >
             <option value="">-- ทั้งหมด --</option>
-            {employees.map((e) => (
-              <option key={e.id} value={e.id}>
+            {employees.map((e, idx) => (
+              <option
+                key={e.id || `emp-${idx}`} 
+                value={e.id}
+              >
                 {e.name}
               </option>
             ))}
           </select>
         </div>
       </div>
-      <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+      <button
+        type="submit"
+        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+      >
         ค้นหา
       </button>
     </form>
