@@ -9,7 +9,7 @@ type Employee = {
   deptname: string;
   deptsbu: string;
   deptstd: string;
-  employeeId: string; 
+  employeeId?: string; 
 };
 
 export function DepartmentTable({ employees }: { employees: Employee[] }) {
@@ -29,22 +29,29 @@ export function DepartmentTable({ employees }: { employees: Employee[] }) {
           </tr>
         </thead>
         <tbody>
-          {employees.map(emp => (
-            <tr key={`${emp.deptcode}-${emp.workdate}-${emp.employeeId}`}>
-              <td className="py-2 px-6">{emp.workdate}</td>
-              <td className="py-2 px-6">{emp.groupid}</td>
-              <td className="py-2 px-6">{emp.groupname}</td>
-              <td className="py-2 px-6">{emp.deptcode}</td>
-              <td className="py-2 px-5">{emp.deptname}</td>
-              <td className="py-2 px-6">{emp.deptsbu}</td>
-              <td className="py-2 px-6">{emp.deptstd}</td>
-              <td className="p-3">
-                <Link href={`../report/${emp.employeeId}/page`}>
-                  <PiFileMagnifyingGlassBold size={30} className="text-blue-500 hover:text-blue-700" />
-                </Link>
-              </td>
-            </tr>
-          ))}
+          {employees.map((emp, index) => {
+            const key = `${emp.deptcode}-${emp.workdate}-${emp.employeeId || index}`;
+            return (
+              <tr key={key}>
+                <td className="py-2 px-6">{emp.workdate}</td>
+                <td className="py-2 px-6">{emp.groupid}</td>
+                <td className="py-2 px-6">{emp.groupname}</td>
+                <td className="py-2 px-6">{emp.deptcode}</td>
+                <td className="py-2 px-5">{emp.deptname}</td>
+                <td className="py-2 px-6">{emp.deptsbu}</td>
+                <td className="py-2 px-6">{emp.deptstd}</td>
+                <td className="p-3">
+                  {emp.employeeId ? (
+                    <Link href={`../report/${emp.employeeId}/page`}>
+                      <PiFileMagnifyingGlassBold size={30} className="text-blue-500 hover:text-blue-700" />
+                    </Link>
+                  ) : (
+                    <span className="text-gray-400">N/A</span>
+                  )}
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>
