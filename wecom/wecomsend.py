@@ -62,7 +62,7 @@ if __name__ == '__main__':
             print("❌ ส่งข้อความล้มเหลว:", result)
 
     except requests.exceptions.RequestException as e: 
-        print(f" เกิดข้อผิดพลาดด้านเครือข่ายหรือ HTTP: {e}")
+        print(f"❌ เกิดข้อผิดพลาดด้านเครือข่ายหรือ HTTP: {e}")
     except KeyError as e:
         print(f"❌ เกิดข้อผิดพลาด KeyError: {e}")
     except ValueError as e:
