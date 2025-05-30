@@ -19,6 +19,9 @@ type Record = {
   deptname: string;
   deptsbu: string;
   deptstd: string;
+  scan: number;
+  noscan: number;
+  late: number;
   employeeId: string;
 };
 
@@ -66,18 +69,15 @@ export default function ReportPage() {
         <>
           <DepartmentTable
             employees={records.map((rec) => ({
-              deptcode: Number(rec.deptcode) || 0,
+              workdate: rec.workdate || '',
+              deptcode: rec.deptcode,
               deptname: rec.deptname,
               deptsbu: rec.deptsbu || '',
               deptstd: rec.deptstd || '',
-              workdate: rec.workdate || '',
-              countscan: '1',
-              countnoscan: '0',
-              parentcode: '',
-              countperson: '1',
+              total: 1,
+              scan: rec.scan || 0,
+              noscan: rec.noscan || 0,
               employeeId: rec.employeeId,
-              groupid: rec.groupid || '',
-              groupname: rec.groupname || '',
             }))}
           />
           <button
