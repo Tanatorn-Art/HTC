@@ -78,6 +78,8 @@ export default function ReportPage() {
               scan: rec.scan || 0,
               noscan: rec.noscan || 0,
               employeeId: rec.employeeId,
+              groupid: rec.groupid || '',         
+              groupname: rec.groupname || '', 
             }))}
           />
           <button

@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const result = await db.query('');
+    const result = await db.query('.....');
 
     return Response.json(result.rows);
   } catch (err) {
