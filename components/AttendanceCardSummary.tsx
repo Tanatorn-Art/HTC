@@ -20,7 +20,6 @@ const AttendanceCardSummary = ({ total, checkedIn, lateCount }: Props) => {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        {/* ปุ่มสำหรับ "เข้าแล้ว" */}
         <button
           onClick={() => handleRedirect('checked_in')}
           className="flex items-center justify-between bg-green-100 hover:bg-green-200 text-green-800 p-4 rounded-2xl shadow-md transition"
