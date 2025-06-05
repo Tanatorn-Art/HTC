@@ -75,7 +75,7 @@ export default function DashboardPage() {
 
       <section className="space-y-4">
         <h1 className="text-xl font-semibold">Department Overview</h1>
-        <DepartmentBarChart apiEndpoint={`/api/attendance/summary?date=${selectedDate}`} />
+        <DepartmentBarChart apiEndpoint={`/api/department?date=${selectedDate}`} />
       </section>
 
       <section className="space-y-4">
