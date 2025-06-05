@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import ReportFilterForm from '@/components/ReportFilterForm';
 import { DepartmentTable } from '@/components/DepartmentTable';
+import Spinner from '@/components/ui/Spinner';
 import Papa from 'papaparse';
 
 type Filters = {
@@ -58,11 +59,11 @@ export default function ReportPage() {
 
   return (
     <div className="p-6 space-y-4">
-      <h1 className="text-2xl font-bold">รายงานการเข้าออก</h1>
+      <h1 className="text-2xl font-bold">รายงานการเข้าง</h1>
       <ReportFilterForm onSearch={handleSearch} />
 
       {loading ? (
-        <div className="text-center text-gray-500">กำลังโหลดข้อมูล...</div>
+        <Spinner/>
       ) : records.length === 0 ? (
         <div className="text-center text-gray-400">ไม่พบข้อมูล</div>
       ) : (

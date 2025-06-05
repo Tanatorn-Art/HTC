@@ -1,82 +1,91 @@
-'use client';
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { PiFileMagnifyingGlassBold } from 'react-icons/pi';
 
-import { useEffect, useState } from 'react';
 import Spinner from '@/components/ui/Spinner';
 
-type Manpower = {
-  section: string;
-  type: string;
-  sbu: string;
-  current: number;
-  htc_thai: number;
-  htc_kh: number;
-  sub_thai: number;
-  sub_kh: number;
-  htc_ho: number;
-  management_ho: number;
-  foreign_ho: number;
+type Employee = {
+  workdate: string;
+  groupid: string;
+  groupname: string;
+  deptcode: number;
+  deptname: string;
+  deptsbu: string;
+  deptstd: string;
+  employeeId?: string;
 };
 
 export function ManpowerTable() {
-  const [data, setData] = useState<Manpower[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    async function fetchData() {
+    const fetchEmployees = async () => {
       try {
-        const res = await fetch('/api/manpower');
-        const result = await res.json();
-        setData(result);
-      } catch (error) {
-        console.error('Error fetching manpower:', error);
-      } finally {
+        const today = new Date().toISOString().split('T')[0]; 
+        const response = await fetch(`/api/department?date=${today}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch employees');
+        }
+        const data: Employee[] = await response.json();
+        setEmployees(data);
+        setLoading(false);
+      } catch (err) {
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError('An unexpected error occurred');
+        }
         setLoading(false);
       }
-    }
+    };
 
-    fetchData();
+    fetchEmployees();
   }, []);
 
   if (loading) {
-    return <Spinner />;
+    return (
+      <div className="flex justify-center items-center p-4">
+        <Spinner />
+      </div>
+    );
   }
 
-  if (!data.length) {
-    return <div className="text-center text-gray-500">ไม่พบข้อมูลพนักงานในขณะนี้</div>;
+  if (error) {
+    return <div className="text-red-500">Error: {error}</div>;
   }
 
   return (
-    <div className="overflow-x-auto bg-white rounded-xl shadow-md p-4">
-      <table className="min-w-full text-sm text-center border-collapse">
-        <thead className="bg-yellow-100 text-gray-700">
+    <div className="overflow-x-auto bg-white rounded-xl shadow p-4">
+      <table className="min-w-full text-sm text-left border-collapse">
+        <thead className="border-b text-gray-600">
           <tr>
-            <th className="px-4 py-2">Section</th>
-            <th className="px-4 py-2">Type</th>
-            <th className="px-4 py-2">SBU HC</th>
-            <th className="px-4 py-2">Current HC(1)</th>
-            <th className="px-4 py-2">HTC THAI (KB)</th>
-            <th className="px-4 py-2">HTC KH (KB)</th>
-            <th className="px-4 py-2">Sub THAI (KB)</th>
-            <th className="px-4 py-2">Sub KH (KB)</th>
-            <th className="px-4 py-2">HTC (HO)</th>
-            <th className="px-4 py-2">Management (HO)</th>
-            <th className="px-4 py-2">Foreign (HO)</th>
+            <th className="py-2 px-6">workdate</th>
+            <th className="py-2 px-6">groupid</th>
+            <th className="py-2 px-6">groupname</th>
+            <th className="py-2 px-6">deptcode</th>
+            <th className="py-2 px-6">deptname</th>
+            <th className="py-2 px-6">deptsbu</th>
+            <th className="py-2 px-6">deptstd</th>
+            <th className="p-0"></th>
           </tr>
         </thead>
         <tbody>
-          {data.map((row, idx) => (
-            <tr key={idx} className="border-t hover:bg-gray-50">
-              <td className="px-4 py-2">{row.section}</td>
-              <td className="px-4 py-2">{row.type}</td>
-              <td className="px-4 py-2">{row.sbu}</td>
-              <td className="px-4 py-2">{row.current}</td>
-              <td className="px-4 py-2">{row.htc_thai}</td>
-              <td className="px-4 py-2">{row.htc_kh}</td>
-              <td className="px-4 py-2">{row.sub_thai}</td>
-              <td className="px-4 py-2">{row.sub_kh}</td>
-              <td className="px-4 py-2">{row.htc_ho}</td>
-              <td className="px-4 py-2">{row.management_ho}</td>
-              <td className="px-4 py-2">{row.foreign_ho}</td>
+          {employees.map((emp, index) => (
+            <tr key={`${emp.deptcode}-${emp.workdate}-${emp.employeeId ?? 'noempid'}-${index}`}>
+              <td className="py-2 px-6">{emp.workdate}</td>
+              <td className="py-2 px-6">{emp.groupid}</td>
+              <td className="py-2 px-6">{emp.groupname}</td>
+              <td className="py-2 px-6">{emp.deptcode}</td>
+              <td className="py-2 px-6">{emp.deptname}</td>
+              <td className="py-2 px-6">{emp.deptsbu}</td>
+              <td className="py-2 px-6">{emp.deptstd}</td>
+              <td className="p-3">
+                <Link href={`/api/attendance/report${emp.employeeId ?? ''}/page`}>
+                  <PiFileMagnifyingGlassBold size={30} className="text-blue-500 hover:text-blue-700" />
+                </Link>
+              </td>
             </tr>
           ))}
         </tbody>

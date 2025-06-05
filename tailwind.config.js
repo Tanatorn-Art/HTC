@@ -1,17 +1,17 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    './pages/**/*.{js,ts,jsx,tsx}', // ปรับตามโครงสร้างโปรเจกต์ของคุณ
+    './pages/**/*.{js,ts,jsx,tsx}', 
     './components/**/*.{js,ts,jsx,tsx}',
     './styles/**/*.css',
   ],
   theme: {
     extend: {
       colors: {
-        primary: '#1d4ed8',          // Blue-700
-        secondary: '#1e293b',        // Slate-800
-        background: '#ffffff',       // White
-        muted: '#64748b',            // Slate-500
+        primary: '#1d4ed8',          
+        secondary: '#1e293b',        
+        background: '#ffffff',       
+        muted: '#64748b',            
       },
       borderRadius: {
         xl: '1rem',
