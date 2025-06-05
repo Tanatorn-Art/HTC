@@ -15,34 +15,39 @@ type Employee = {
   employeeId?: string;
 };
 
-export function ManpowerTable() {
+type ManpowerTableProps = {
+  selectedDate: string;
+};
+
+export function ManpowerTable({ selectedDate }: ManpowerTableProps) {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchEmployees = async () => {
+      setLoading(true);
+      setError(null);
       try {
-        const today = new Date().toISOString().split('T')[0]; 
-        const response = await fetch(`/api/department?date=${today}`);
+        const response = await fetch(`/api/department?date=${selectedDate}`);
         if (!response.ok) {
           throw new Error('Failed to fetch employees');
         }
         const data: Employee[] = await response.json();
         setEmployees(data);
-        setLoading(false);
       } catch (err) {
         if (err instanceof Error) {
           setError(err.message);
         } else {
           setError('An unexpected error occurred');
         }
+      } finally {
         setLoading(false);
       }
     };
 
     fetchEmployees();
-  }, []);
+  }, [selectedDate]);
 
   if (loading) {
     return (

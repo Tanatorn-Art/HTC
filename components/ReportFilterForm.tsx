@@ -26,14 +26,43 @@ const ReportFilterForm = ({ onSearch }: Props) => {
   useEffect(() => {
     fetch('/api/department')
       .then(res => res.json())
-      .then(setDepartments);
+      .then(data => {
+        console.log('Fetched departments:', data);
+        // ตรวจสอบว่า data เป็น array หรือ object ที่มี property เป็น array
+        if (Array.isArray(data)) {
+          setDepartments(data);
+        } else if (data && Array.isArray(data.departments)) {
+          setDepartments(data.departments);
+        } else {
+          console.warn('Unexpected departments data format:', data);
+          setDepartments([]);
+        }
+      })
+      .catch(err => {
+        console.error('Error fetching departments:', err);
+        setDepartments([]);
+      });
   }, []);
 
   useEffect(() => {
     if (departmentId) {
       fetch(`/api/employees?departmentId=${departmentId}`)
         .then(res => res.json())
-        .then(setEmployees);
+        .then(data => {
+          console.log('Fetched employees:', data);
+          if (Array.isArray(data)) {
+            setEmployees(data);
+          } else if (data && Array.isArray(data.employees)) {
+            setEmployees(data.employees);
+          } else {
+            console.warn('Unexpected employees data format:', data);
+            setEmployees([]);
+          }
+        })
+        .catch(err => {
+          console.error('Error fetching employees:', err);
+          setEmployees([]);
+        });
     } else {
       setEmployees([]);
     }

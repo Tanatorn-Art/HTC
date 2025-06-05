@@ -4,13 +4,14 @@ import { useRouter } from 'next/navigation';
 import { FaCheckCircle, FaExclamationCircle, FaClock } from 'react-icons/fa';
 
 type Props = {
-  total: number;
   checkedIn: number;
-  lateCount: number; 
+  lateCount: number;
+  notCheckedIn: number; // Prop นี้มีอยู่แล้ว
 };
 
-const AttendanceCardSummary = ({ total, checkedIn, lateCount }: Props) => {
-  const notCheckedIn = total - checkedIn;
+// เพิ่ม notCheckedIn เข้าไปในการ Destructure props
+const AttendanceCardSummary = ({ checkedIn, lateCount, notCheckedIn }: Props) => {
+
   const router = useRouter();
 
   const handleRedirect = (status: string) => {
@@ -20,6 +21,7 @@ const AttendanceCardSummary = ({ total, checkedIn, lateCount }: Props) => {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        {/* ปุ่มสำหรับ "เข้าแล้ว" */}
         <button
           onClick={() => handleRedirect('checked_in')}
           className="flex items-center justify-between bg-green-100 hover:bg-green-200 text-green-800 p-4 rounded-2xl shadow-md transition"
@@ -33,6 +35,7 @@ const AttendanceCardSummary = ({ total, checkedIn, lateCount }: Props) => {
           </div>
         </button>
 
+        {/* ปุ่มสำหรับ "ยังไม่ได้เข้า" (จะแสดงค่าจาก prop) */}
         <button
           onClick={() => handleRedirect('not_checked')}
           className="flex items-center justify-between bg-red-100 hover:bg-red-200 text-red-800 p-4 rounded-2xl shadow-md transition"
@@ -40,12 +43,13 @@ const AttendanceCardSummary = ({ total, checkedIn, lateCount }: Props) => {
           <div className="flex items-center gap-3">
             <FaExclamationCircle size={28} />
             <div>
-              <div className="text-xl font-bold">{notCheckedIn}</div>
+              <div className="text-xl font-bold">{notCheckedIn}</div> {/* ตรงนี้จะใช้ค่าจาก prop โดยตรง */}
               <div className="text-sm">No Scan</div>
             </div>
           </div>
         </button>
 
+        {/* ปุ่มสำหรับ "มาสาย" */}
         <button
           onClick={() => handleRedirect('late')}
           className="flex items-center justify-between bg-yellow-100 hover:bg-yellow-200 text-yellow-800 p-4 rounded-2xl shadow-md transition"
