@@ -2,29 +2,36 @@
 
 type Props = {
   date: string;
-  totalEmployees: number;
-  checkedIn: number;
-  notCheckedIn: number;
+  totalScanned: number;    
+  totalNotScanned: number; 
 };
 
 const AttendanceTextSummary = ({
   date,
-  totalEmployees,
-  checkedIn,
-  notCheckedIn,
+  totalScanned,    // 
+  totalNotScanned, // 
 }: Props) => {
+  // คำนวณ totalEmployees จาก totalScanned และ totalNotScanned
+  const totalEmployees = totalScanned + totalNotScanned;
+
   return (
     <div className="text-gray-700 text-base">
       วันที่ <span className="font-semibold">{date}</span> มีพนักงานทั้งหมด{' '}
-      <span className="font-semibold">{totalEmployees}</span> คน,
+      <span className="font-semibold">
+        {/* ใช้ค่า totalEmployees ที่คำนวณได้ */}
+        {isNaN(totalEmployees) ? 'N/A' : totalEmployees}
+      </span>{' '}
+      คน,
       เข้าแล้ว{' '}
       <span className="text-green-600 font-semibold">
-        {isNaN(checkedIn) ? 'N/A' : checkedIn}
+        {/* ใช้ค่า totalScanned */}
+        {isNaN(totalScanned) ? 'N/A' : totalScanned}
       </span>{' '}
       คน,
       ยังไม่เข้า{' '}
       <span className="text-red-600 font-semibold">
-        {isNaN(notCheckedIn) ? 'N/A' : notCheckedIn}
+        {/* ใช้ค่า totalNotScanned */}
+        {isNaN(totalNotScanned) ? 'N/A' : totalNotScanned}
       </span>{' '}
       คน
     </div>

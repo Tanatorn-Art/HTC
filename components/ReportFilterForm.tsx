@@ -4,6 +4,11 @@ import { useEffect, useState } from 'react';
 
 type Props = {
   onSearch: (filters: { date: string; departmentId: string; employeeId: string }) => void;
+  initialFilters: {
+    date: string;
+    departmentId: string;
+    employeeId: string;
+  };
 };
 
 type Department = {
@@ -16,19 +21,18 @@ type Employee = {
   name: string;
 };
 
-const ReportFilterForm = ({ onSearch }: Props) => {
-  const [date, setDate] = useState('');
+const ReportFilterForm = ({ onSearch, initialFilters }: Props) => {
+  const [date, setDate] = useState(initialFilters.date);
+  const [departmentId, setDepartmentId] = useState(initialFilters.departmentId);
+  const [employeeId, setEmployeeId] = useState(initialFilters.employeeId);
+
   const [departments, setDepartments] = useState<Department[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
-  const [departmentId, setDepartmentId] = useState('');
-  const [employeeId, setEmployeeId] = useState('');
 
   useEffect(() => {
     fetch('/api/department')
       .then(res => res.json())
       .then(data => {
-        console.log('Fetched departments:', data);
-        // ตรวจสอบว่า data เป็น array หรือ object ที่มี property เป็น array
         if (Array.isArray(data)) {
           setDepartments(data);
         } else if (data && Array.isArray(data.departments)) {
@@ -49,7 +53,6 @@ const ReportFilterForm = ({ onSearch }: Props) => {
       fetch(`/api/employees?departmentId=${departmentId}`)
         .then(res => res.json())
         .then(data => {
-          console.log('Fetched employees:', data);
           if (Array.isArray(data)) {
             setEmployees(data);
           } else if (data && Array.isArray(data.employees)) {

@@ -5,13 +5,13 @@ import { PiFileMagnifyingGlassBold } from 'react-icons/pi';
 import Spinner from '@/components/ui/Spinner';
 
 type Employee = {
-  workdate: string;
-  groupid: string;
-  groupname: string;
   deptcode: number;
   deptname: string;
   deptsbu: string;
   deptstd: string;
+  countscan :number;
+  countnotscan: number;
+  countperson: number;
   employeeId?: string;
 };
 
@@ -61,34 +61,47 @@ export function ManpowerTable({ selectedDate }: ManpowerTableProps) {
     return <div className="text-red-500">Error: {error}</div>;
   }
 
+  if (employees.length === 0) {
+    return (
+      <div className="text-center py-4 text-gray-500">
+        ไม่พบข้อมูล
+      </div>
+    );
+  }
+
   return (
     <div className="overflow-x-auto bg-white rounded-xl shadow p-4">
       <table className="min-w-full text-sm text-left border-collapse">
         <thead className="border-b text-gray-600">
           <tr>
-            <th className="py-2 px-6">workdate</th>
-            <th className="py-2 px-6">groupid</th>
-            <th className="py-2 px-6">groupname</th>
             <th className="py-2 px-6">deptcode</th>
             <th className="py-2 px-6">deptname</th>
             <th className="py-2 px-6">deptsbu</th>
             <th className="py-2 px-6">deptstd</th>
+            <th className="py-2 px-6">Scan</th>
+            <th className="py-2 px-6">No Scan</th>
+            <th className="py-2 px-6">Person</th>
             <th className="p-0"></th>
           </tr>
         </thead>
         <tbody>
           {employees.map((emp, index) => (
-            <tr key={`${emp.deptcode}-${emp.workdate}-${emp.employeeId ?? 'noempid'}-${index}`}>
-              <td className="py-2 px-6">{emp.workdate}</td>
-              <td className="py-2 px-6">{emp.groupid}</td>
-              <td className="py-2 px-6">{emp.groupname}</td>
+            <tr
+              key={`${emp.deptcode}-${emp.employeeId ?? 'noempid'}-${index}`}
+            >
               <td className="py-2 px-6">{emp.deptcode}</td>
               <td className="py-2 px-6">{emp.deptname}</td>
               <td className="py-2 px-6">{emp.deptsbu}</td>
               <td className="py-2 px-6">{emp.deptstd}</td>
+              <td className="py-2 px-6">{emp.countscan}</td>
+              <td className="py-2 px-6">{emp.countnotscan}</td>
+              <td className="py-2 px-6">{emp.countperson}</td>
               <td className="p-3">
                 <Link href={`/api/attendance/report${emp.employeeId ?? ''}/page`}>
-                  <PiFileMagnifyingGlassBold size={30} className="text-blue-500 hover:text-blue-700" />
+                  <PiFileMagnifyingGlassBold
+                    size={30}
+                    className="text-blue-500 hover:text-blue-700"
+                  />
                 </Link>
               </td>
             </tr>

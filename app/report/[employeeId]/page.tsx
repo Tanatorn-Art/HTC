@@ -137,7 +137,7 @@ export default function ReportDetailPage() {
           onChange={(e) => setShowLateOnly(e.target.checked)}
           className="accent-red-500"
         />
-        แสดงเฉพาะคนมาสาย (หลัง 08:00)
+     
       </label>
 
       {loading ? (

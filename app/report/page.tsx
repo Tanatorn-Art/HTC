@@ -30,10 +30,21 @@ export default function ReportPage() {
   const [records, setRecords] = useState<Record[]>([]);
   const [loading, setLoading] = useState(false);
 
+  const initialFilters: Filters = {
+    date: new Date().toISOString().slice(0, 10),  // ✅ ตั้งค่าเป็นวันที่ปัจจุบัน
+    departmentId: '',
+    employeeId: '',
+  };
+
   const handleSearch = async (newFilters: Filters) => {
     setLoading(true);
 
-    const params = new URLSearchParams(newFilters).toString();
+    const params = new URLSearchParams({
+      date: newFilters.date || '',
+      departmentId: newFilters.departmentId || '',
+      employeeId: newFilters.employeeId || '',
+    }).toString();
+
     const res = await fetch(`/api/attendance/report?${params}`);
     const data = await res.json();
 
@@ -59,11 +70,11 @@ export default function ReportPage() {
 
   return (
     <div className="p-6 space-y-4">
-      <h1 className="text-2xl font-bold">รายงานการเข้าง</h1>
-      <ReportFilterForm onSearch={handleSearch} />
+      <h1 className="text-2xl font-bold">รายงานการเข้างาน</h1>
+      <ReportFilterForm onSearch={handleSearch} initialFilters={initialFilters} />
 
       {loading ? (
-        <Spinner/>
+        <Spinner />
       ) : records.length === 0 ? (
         <div className="text-center text-gray-400">ไม่พบข้อมูล</div>
       ) : (
@@ -75,12 +86,10 @@ export default function ReportPage() {
               deptname: rec.deptname,
               deptsbu: rec.deptsbu || '',
               deptstd: rec.deptstd || '',
-              total: 1,
-              scan: rec.scan || 0,
-              noscan: rec.noscan || 0,
+              countscan: rec.scan || 0,
+              countnotscan: rec.noscan || 0,
+              countperson: 1,
               employeeId: rec.employeeId,
-              groupid: rec.groupid || '',         
-              groupname: rec.groupname || '', 
             }))}
           />
           <button

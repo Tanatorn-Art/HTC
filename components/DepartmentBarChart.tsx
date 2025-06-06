@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -10,32 +10,60 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
+import ZoomPlugin from 'chartjs-plugin-zoom';
 import Spinner from '@/components/ui/Spinner';
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
+ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend, ZoomPlugin);
 
 type Props = {
   apiEndpoint: string;
 };
 
+type DepartmentChartData = {
+  deptcode: string;
+  department: string;
+  scannedCount: number;
+  notScannedCount: number;
+};
+
 export default function DepartmentBarChart({ apiEndpoint }: Props) {
-  const [data, setData] = useState<{ department: string; count: number }[]>([]);
+  const [data, setData] = useState<DepartmentChartData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [inView, setInView] = useState(false); // สถานะว่ากราฟอยู่ใน viewport หรือยัง
+  const chartContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setInView(true);
+          observer.disconnect(); // ให้ observe ครั้งเดียวพอ
+        }
+      },
+      { threshold: 0.3 } // เห็นประมาณ 30% แล้วเริ่ม animate ได้
+    );
+
+    if (chartContainerRef.current) {
+      observer.observe(chartContainerRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoading(true);
         const res = await fetch(apiEndpoint);
-        const result = await res.json();
-
-        const chart = result.map((dept: { deptname: string; countPerson: number }) => ({
-          department: dept.deptname,
-          count: dept.countPerson,
-        }));
-
-        setData(chart);
+        if (!res.ok) {
+          const errorData = await res.json();
+          throw new Error(errorData.error || 'Failed to fetch data');
+        }
+        const result: DepartmentChartData[] = await res.json();
+        setData(result);
       } catch (error) {
         console.error('Failed to fetch data:', error);
+        setData([]);
       } finally {
         setLoading(false);
       }
@@ -60,30 +88,81 @@ export default function DepartmentBarChart({ apiEndpoint }: Props) {
     labels: data.map((d) => d.department),
     datasets: [
       {
-        label: 'จำนวนพนักงาน',
-        data: data.map((d) => d.count),
-        backgroundColor: '#3B82F6',
+        label: 'สแกนเข้าแล้ว',
+        data: data.map((d) => d.scannedCount),
+        backgroundColor: '#4CAF50',
+        stack: 'Stack 1',
+      },
+      {
+        label: 'ยังไม่สแกน',
+        data: data.map((d) => d.notScannedCount),
+        backgroundColor: '#FFC107',
+        stack: 'Stack 1',
       },
     ],
   };
 
   const options = {
     responsive: true,
+    maintainAspectRatio: false,
     plugins: {
-      legend: { display: false },
+      legend: {
+        position: 'top' as const,
+      },
+      title: {
+        display: true,
+        text: 'สรุปจำนวนพนักงานที่สแกนเข้าและยังไม่สแกน (รวมแผนกที่ไม่มีการสแกน)',
+      },
+      zoom: {
+        pan: {
+          enabled: true,
+          mode: 'x',
+        },
+        zoom: {
+          wheel: {
+            enabled: true,
+          },
+          pinch: {
+            enabled: true,
+          },
+          mode: 'x',
+        },
+      },
     },
+    animation: inView
+      ? {
+          duration: 1000,
+          easing: 'easeOutQuart',
+        }
+      : false, // ยังไม่เห็น = ไม่ animate
     scales: {
+      x: {
+        stacked: true,
+        title: {
+          display: true,
+          text: 'แผนก',
+        },
+      },
       y: {
+        stacked: true,
         beginAtZero: true,
         ticks: { precision: 0 },
+        title: {
+          display: true,
+          text: 'จำนวนพนักงาน',
+        },
       },
     },
   };
 
   return (
-    <div className="bg-white p-4 rounded-lg shadow">
-      <h2 className="text-lg font-semibold mb-4">จำนวนพนักงานแต่ละแผนก</h2>
-      <Bar data={chartData} options={options} />
+    <div className="bg-white p-4 rounded-lg shadow" ref={chartContainerRef}>
+      <h2 className="text-lg font-semibold mb-4">
+        สรุปจำนวนพนักงานแต่ละแผนก (สแกนเข้า / ยังไม่สแกน)
+      </h2>
+      <div style={{ height: '500px' }}>
+        <Bar data={chartData} options={options} />
+      </div>
     </div>
   );
 }

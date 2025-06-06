@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
       return new Response(JSON.stringify({ error: 'Missing date' }), { status: 400 });
     }
 
-    let query = 'SELECT * FROM public.vw_manpower_att_group WHERE workdate = $1';
+    let query = 'SELECT * FROM public.vw_manpower WHERE workdate = $1 ORDER BY deptcode ASC';
     const values: string[] = [date];
     let index = 2;
 

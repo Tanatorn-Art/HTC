@@ -1,60 +1,54 @@
 import { NextRequest } from 'next/server';
-import db from '@/services/db'; // นำเข้าโมดูลเชื่อมต่อฐานข้อมูล
+import db from '@/services/db';
+
+// กำหนด Type ของข้อมูลที่คาดว่าจะได้รับจาก vw_manpower query
+interface SummaryData {
+  totalScanned: string;
+  totalNotScanned: string;
+}
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
-  const selectdate = searchParams.get('selectdate'); // ดึงค่า 'date' จาก URL Query Parameter
-  const dateRegex = /^\d{4}-\d{2}-\d{2}$/; // รูปแบบวันที่ YYYY-MM-DD
+  // API นี้จะคาดหวัง parameter ชื่อ 'date'
+  const date = searchParams.get('date'); 
+  const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
 
-  //  ตรวจสอบความถูกต้องของวันที่ที่ส่งมา
-  if (!selectdate || !dateRegex.test(selectdate)) {
-    // ปรับข้อความ Error ให้สื่อความหมายชัดเจนขึ้น
+  if (!date || !dateRegex.test(date)) {
     return new Response(
-      JSON.stringify({ error: 'Invalid or missing date format. Please use YYYY-MM-DD (e.g., 2025-05-29).' }),
-      { status: 400 } // Bad Request
+      JSON.stringify({ error: 'รูปแบบวันที่ไม่ถูกต้องหรือไม่ครบถ้วน โปรดใช้รูปแบบ ปี-เดือน-วัน (yyyy-mm-dd).' }),
+      { status: 400 }
     );
   }
 
   try {
-    // Query ข้อมูลสรุปรวมจาก View ที่สร้างไว้
-    const result = await db.query(
+    const result = await db.query<SummaryData>(
+      // *** ใช้ SQL Query ที่ดึงข้อมูลจาก public.vw_manpower ตามที่คุณต้องการ ***
       `SELECT
-    -- ส่วนนี้คือนับ "พนักงานทั้งหมด" ที่มีบันทึกใน vw_attendance_status
-    -- จะเป็นผลรวมของ checkedIn, lateCount, และ notCheckedIn
-    COUNT(DISTINCT vas.employeeid) AS "totalEmployees",
-
-    -- นับพนักงานที่ไม่ซ้ำกันที่สแกนเข้าแล้ว
-    COUNT(DISTINCT vas.employeeid) FILTER (WHERE status = 'scan')     AS "checkedIn",
-
-    -- นับพนักงานที่ไม่ซ้ำกันที่มาสาย
-    COUNT(DISTINCT vas.employeeid) FILTER (WHERE status = 'late')     AS "lateCount",
-
-    -- นับพนักงานที่ไม่ซ้ำกันที่มีบันทึก 'noscan'
-    COUNT(DISTINCT vas.employeeid) FILTER (WHERE status = 'noscan')   AS "notCheckedIn"
-    FROM public.vw_attendance_status vas
-    WHERE vas.accessdate = $1;
+          COALESCE(SUM(countscan), 0) AS "totalScanned",      -- รวมจำนวนคนที่สแกนแล้วทั้งหมด (จากทุกแผนก)
+          COALESCE(SUM(countnotscan), 0) AS "totalNotScanned" -- รวมจำนวนคนที่ยังไม่สแกนทั้งหมด (จากทุกแผนก)
+       FROM
+          public.vw_manpower
+       WHERE
+          workdate = $1;
       `,
-      [selectdate]
+      [date] // ใช้ 'date' ตรงนี้
     );
 
-    // 3. ส่งผลลัพธ์กลับไปในรูปแบบ JSON
     const rawSummary = result.rows[0] || {};
 
     const summary = {
-      totalEmployees: parseInt(rawSummary.totalEmployees || '0', 10),
-      checkedIn: parseInt(rawSummary.checkedIn || '0', 10),
-      lateCount: parseInt(rawSummary.lateCount || '0', 10),
-      notCheckedIn: parseInt(rawSummary.notCheckedIn || '0', 10),
+      // แปลงค่าที่ได้เป็นตัวเลข (ควรจะเป็นตัวเลขอยู่แล้วจาก COALESCE และ SUM)
+      totalScanned: parseInt(rawSummary.totalScanned || '0', 10), 
+      totalNotScanned: parseInt(rawSummary.totalNotScanned || '0', 10), 
     };
 
     return Response.json(summary);
 
-  } catch (err) {
-    // 4. จัดการข้อผิดพลาดที่เกิดขึ้น
-    console.error('Error fetching attendance summary from view:', err);
+  } catch (err: any) {
+    console.error('Error fetching attendance summary from vw_manpower:', err);
     return new Response(
-      JSON.stringify({ error: 'Failed to fetch attendance summary due to a server error.' }),
-      { status: 500 } // Internal Server Error
+      JSON.stringify({ error: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์ขณะดึงข้อมูลสรุปการเข้างานจาก vw_manpower' }),
+      { status: 500 }
     );
   }
 }
