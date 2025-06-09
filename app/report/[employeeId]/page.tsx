@@ -3,9 +3,6 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { PiSpinnerGapBold } from 'react-icons/pi';
-// import ExcelJS from 'exceljs'; 
-// import { saveAs } from 'file-saver'; 
-// import dayjs from 'dayjs';
 import Breadcrumb from '@/components/Breadcrumb';
 
 type Detail = {
@@ -24,14 +21,11 @@ type Detail = {
 
 export default function ReportDetailPage() {
   const { deptcode } = useParams();
-
   const [details, setDetails] = useState<Detail[]>([]);
   const [deptName, setDeptName] = useState('');
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
-  const [showLateOnly, setShowLateOnly] = useState(false);
   const [loading, setLoading] = useState(false);
-
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
@@ -43,6 +37,7 @@ export default function ReportDetailPage() {
 
   useEffect(() => {
     if (invalidDept || invalidDate) return;
+
     const fetchDetails = async () => {
       setLoading(true);
       const params = new URLSearchParams();
@@ -50,7 +45,7 @@ export default function ReportDetailPage() {
       if (to) params.append('to', to);
       params.append('deptcode', deptcode as string);
 
-      const res = await fetch('/api/attendance/detail?${params.toString()}');
+      const res = await fetch(`/api/attendance/report/detail?${params.toString()}`);
       const data = await res.json();
       setDetails(data.records);
       setDeptName(data.deptname || '');
@@ -60,6 +55,25 @@ export default function ReportDetailPage() {
     fetchDetails();
   }, [deptcode, from, to, invalidDept, invalidDate]);
 
+  const exportToCSV = () => {
+    if (details.length === 0) return;
+
+    const headers = ['ชื่อ', 'เวลาเข้า', 'เวลาออก'];
+    const rows = details.map((d) => [d.fullname, d.checkIn || '-', d.checkOut || '-']);
+
+    const csvContent =
+      'data:text/csv;charset=utf-8,' +
+      [headers, ...rows].map((e) => e.join(',')).join('\n');
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `report_${deptName}_${from || 'start'}_to_${to || 'end'}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   if (invalidDept) {
     return <div className="text-red-600">รหัสแผนกไม่ถูกต้อง</div>;
   }
@@ -67,13 +81,10 @@ export default function ReportDetailPage() {
     return <div className="text-red-600">วันที่ไม่ถูกต้อง</div>;
   }
 
-  const filtered = showLateOnly
-    ? details.filter((d) => d.checkIn && d.checkIn > '08:00:00')
-    : details;
+  const filtered = details;
 
   const total = details.length;
   const came = details.filter((d) => d.checkIn).length;
-  const late = details.filter((d) => d.checkIn && d.checkIn > '08:00:00').length;
   const absent = details.filter((d) => !d.checkIn).length;
 
   const totalPages = Math.ceil(filtered.length / itemsPerPage);
@@ -94,21 +105,6 @@ export default function ReportDetailPage() {
 
       <h1 className="text-2xl font-bold">รายละเอียดแผนก: {deptName}</h1>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-blue-100 text-blue-900 p-4 rounded-xl shadow">
-          <div className="text-sm">ทั้งหมด</div>
-          <div className="text-xl font-bold">{total} คน</div>
-        </div>
-        <div className="bg-green-100 text-green-900 p-4 rounded-xl shadow">
-          <div className="text-sm">มาแล้ว</div>
-          <div className="text-xl font-bold">{came} คน</div>
-        </div>
-        <div className="bg-red-100 text-red-900 p-4 rounded-xl shadow">
-          <div className="text-sm">ไม่มา</div>
-          <div className="text-xl font-bold">{absent} คน</div>
-        </div>
-      </div>
-
       <div className="flex items-center gap-3">
         <label className="text-sm font-medium">เลือกวันที่:</label>
         <input
@@ -124,17 +120,28 @@ export default function ReportDetailPage() {
           onChange={(e) => setTo(e.target.value)}
           className="border border-slate-300 px-2 py-1 rounded"
         />
+        <button
+          onClick={exportToCSV}
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+        >
+          Export CSV
+        </button>
       </div>
 
-      <label className="flex items-center gap-2 text-sm">
-        <input
-          type="checkbox"
-          checked={showLateOnly}
-          onChange={(e) => setShowLateOnly(e.target.checked)}
-          className="accent-red-500"
-        />
-     
-      </label>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="bg-blue-100 text-blue-900 p-4 rounded-xl shadow">
+          <div className="text-sm">ทั้งหมด</div>
+          <div className="text-xl font-bold">{total} คน</div>
+        </div>
+        <div className="bg-green-100 text-green-900 p-4 rounded-xl shadow">
+          <div className="text-sm">มาแล้ว</div>
+          <div className="text-xl font-bold">{came} คน</div>
+        </div>
+        <div className="bg-red-100 text-red-900 p-4 rounded-xl shadow">
+          <div className="text-sm">ไม่มา</div>
+          <div className="text-xl font-bold">{absent} คน</div>
+        </div>
+      </div>
 
       {loading ? (
         <div className="flex justify-center py-10 text-gray-500 animate-spin">
@@ -151,22 +158,13 @@ export default function ReportDetailPage() {
               </tr>
             </thead>
             <tbody>
-              {paginatedData.map((row, idx) => {
-                const isLate = row.checkIn && row.checkIn > '08:00:00';
-                return (
-                  <tr
-                    key={idx}
-                    className={isLate ? 'bg-red-100 text-red-700 font-semibold' : ''}
-                  >
-                    <td className="p-3">
-                      {row.fullname}
-                      {isLate && <span className="ml-2 text-sm">🕒 มาสาย</span>}
-                    </td>
-                    <td className="p-3">{row.checkIn || '-'}</td>
-                    <td className="p-3">{row.checkOut || '-'}</td>
-                  </tr>
-                );
-              })}
+              {paginatedData.map((row, idx) => (
+                <tr key={idx}>
+                  <td className="p-3">{row.fullname}</td>
+                  <td className="p-3">{row.checkIn || '-'}</td>
+                  <td className="p-3">{row.checkOut || '-'}</td>
+                </tr>
+              ))}
             </tbody>
           </table>
 
