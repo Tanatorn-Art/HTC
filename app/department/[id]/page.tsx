@@ -14,6 +14,9 @@ type Employee = {
   deptname: string;
   deptsbu: string;
   deptstd: string;
+  countscan: number;
+  countnotscan: number;
+  countperson: number;
 };
 
 type EmployeeRaw = {
@@ -25,6 +28,9 @@ type EmployeeRaw = {
   deptname?: string;
   deptsbu?: string;
   deptstd?: string;
+  countscan?: number;
+  countnotscan?: number;
+  countperson?: number;
 };
 
 export default function DepartmentDetailPage() {
@@ -59,6 +65,9 @@ export default function DepartmentDetailPage() {
           deptname: emp.deptname ?? '',
           deptsbu: emp.deptsbu ?? '',
           deptstd: emp.deptstd ?? '',
+          countscan: emp.countscan ?? 0,
+          countnotscan: emp.countnotscan ?? 0,
+          countperson: emp.countperson ?? 0,
         }));
 
         setDepartment({ name: data.name, employees });

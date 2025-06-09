@@ -9,6 +9,8 @@ import {
   LinearScale,
   Tooltip,
   Legend,
+  type ChartOptions,
+  type AnimationSpec,
 } from 'chart.js';
 import ZoomPlugin from 'chartjs-plugin-zoom';
 import Spinner from '@/components/ui/Spinner';
@@ -29,7 +31,7 @@ type DepartmentChartData = {
 export default function DepartmentBarChart({ apiEndpoint }: Props) {
   const [data, setData] = useState<DepartmentChartData[]>([]);
   const [loading, setLoading] = useState(true);
-  const [inView, setInView] = useState(false); // สถานะว่ากราฟอยู่ใน viewport หรือยัง
+  const [inView, setInView] = useState(false);
   const chartContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -37,10 +39,10 @@ export default function DepartmentBarChart({ apiEndpoint }: Props) {
       ([entry]) => {
         if (entry.isIntersecting) {
           setInView(true);
-          observer.disconnect(); // ให้ observe ครั้งเดียวพอ
+          observer.disconnect();
         }
       },
-      { threshold: 0.3 } // เห็นประมาณ 30% แล้วเริ่ม animate ได้
+      { threshold: 0.3 }
     );
 
     if (chartContainerRef.current) {
@@ -102,12 +104,17 @@ export default function DepartmentBarChart({ apiEndpoint }: Props) {
     ],
   };
 
-  const options = {
+  const animationOptions: AnimationSpec<'bar'> = {
+    duration: 1000,
+    easing: 'easeOutQuart',
+  };
+
+  const options: ChartOptions<'bar'> = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        position: 'top' as const,
+        position: 'top',
       },
       title: {
         display: true,
@@ -129,12 +136,7 @@ export default function DepartmentBarChart({ apiEndpoint }: Props) {
         },
       },
     },
-    animation: inView
-      ? {
-          duration: 1000,
-          easing: 'easeOutQuart',
-        }
-      : false, // ยังไม่เห็น = ไม่ animate
+    animation: inView ? animationOptions : false,
     scales: {
       x: {
         stacked: true,

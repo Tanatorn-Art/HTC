@@ -2,10 +2,10 @@ import { NextRequest } from 'next/server';
 import db from '@/services/db';
 
 interface DepartmentAttendanceRow {
-  deptcode: string;       // รหัสแผนก
-  department_name: string; // ชื่อแผนก
-  count_scanned: string;  // จำนวนคนที่สแกนแล้ว
-  count_not_scanned: string; // จำนวนคนที่ยังไม่สแกน
+  deptcode: string;       
+  department_name: string; 
+  count_scanned: string;  
+  count_not_scanned: string; 
 }
 
 export async function GET(req: NextRequest) {
@@ -21,18 +21,18 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const result = await db.query<DepartmentAttendanceRow>(
+    const result = await db.query(
       `SELECT
-          deptcode::text AS deptcode,       -- ดึง deptcode และแปลงเป็น text
+          deptcode::text AS deptcode,
           deptname AS department_name,
-          SUM(countscan) AS count_scanned,       -- รวมจำนวนคนที่สแกนเข้าแล้ว
-          SUM(countnotscan) AS count_not_scanned  -- รวมจำนวนคนที่ยังไม่สแกน
+          SUM(countscan) AS count_scanned,
+          SUM(countnotscan) AS count_not_scanned
        FROM
           public.vw_manpower
        WHERE
-          workdate = $1 -- กรองตามวันที่ที่เลือก
+          workdate = $1
        GROUP BY
-          deptcode, deptname    -- จัดกลุ่มตาม deptcode และ deptname
+          deptcode, deptname
        ORDER BY
           deptname;
       `,
@@ -48,8 +48,12 @@ export async function GET(req: NextRequest) {
 
     return new Response(JSON.stringify(departmentDataForChart), { status: 200 });
 
-  } catch (err: any) {
-    console.error('Failed to fetch department attendance data from vw_manpower:', err);
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      console.error('Failed to fetch department attendance data from vw_manpower:', err.message);
+    } else {
+      console.error('Unknown error:', err);
+    }
     return new Response(
       JSON.stringify({ error: 'Internal server error during department data fetch' }),
       { status: 500 }

@@ -1,16 +1,21 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import dynamic from 'next/dynamic'; 
 import AttendanceTextSummary from '@/components/AttendanceTextSummary';
 import AttendanceCardSummary from '@/components/AttendanceCardSummary';
-import DepartmentBarChart from '@/components/DepartmentBarChart'; 
 import { ManpowerTable }  from '@/components/ManpowerTable';
+
+
+const DepartmentBarChart = dynamic(
+  () => import('@/components/DepartmentBarChart'),
+  { ssr: false }
+);
 
 export default function DashboardPage() {
   const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [totalScanned, setTotalScanned] = useState(0);
   const [totalNotScanned, setTotalNotScanned] = useState(0);
-  
 
   type SummaryData = {
     totalScanned: number;    
@@ -55,7 +60,7 @@ export default function DashboardPage() {
       <section className="space-y-6">
         <h1 className="text-2xl font-semibold">ภาพรวมวันที่ {selectedDate}</h1>
 
-       <AttendanceTextSummary
+        <AttendanceTextSummary
           date={selectedDate}
           totalScanned={totalScanned}
           totalNotScanned={totalNotScanned}
