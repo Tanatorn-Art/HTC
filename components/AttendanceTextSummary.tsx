@@ -8,10 +8,9 @@ type Props = {
 
 const AttendanceTextSummary = ({
   date,
-  totalScanned,    // 
-  totalNotScanned, // 
+  totalScanned,     
+  totalNotScanned, 
 }: Props) => {
-  // คำนวณ totalEmployees จาก totalScanned และ totalNotScanned
   const totalEmployees = totalScanned + totalNotScanned;
 
   return (

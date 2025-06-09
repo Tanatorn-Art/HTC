@@ -17,7 +17,9 @@ export default function LayoutWrapper({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-gray-100">
       <aside className="fixed top-0 left-0 h-full w-64 bg-white shadow-xl p-6 space-y-6">
-        <div className="text-2xl font-bold text-blue-800">บริษัทของคุณ</div>
+        <div className="text-2xl font-extrabold tracking-tight text-blue-900">
+        HTC <span className="text-blue-600">FaceScan</span></div>
+
         <nav className="space-y-2.5">
           {navItems.map((item) => (
             <Link

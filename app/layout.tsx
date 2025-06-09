@@ -2,7 +2,7 @@ import '../styles/globals.css';
 import LayoutWrapper from '@/components/LayoutWrapper';
 
 export const metadata = {
-  title: 'Your App',
+  title: 'HTC Face Scan',
   description: 'Employee Attendance',
 };
 

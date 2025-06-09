@@ -25,7 +25,7 @@ const AttendanceCardSummary = ({ totalScanned, totalNotScanned }: Props) => {
           className="flex items-center justify-center bg-blue-100 hover:bg-blue-200 text-blue-800 px-6 py-5 rounded-2xl shadow-md transition-transform duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg h-full"
         >
           <div className="flex items-center gap-4">
-            <FaUsers size={36} /> {/* เปลี่ยนไอคอนเป็น FaUsers */}
+            <FaUsers size={36} /> 
             <div className="text-left">
               <div className="text-2xl font-extrabold">{totalEmployees}</div>
               <div className="text-base text-blue-900 font-medium">Total</div> 

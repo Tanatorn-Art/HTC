@@ -44,7 +44,6 @@ export async function GET(req: NextRequest) {
     console.error('Error fetching attendance summary from vw_manpower:', err);
 
     if (err instanceof Error) {
-      // เราสามารถใช้ err.name หรือ err.message ได้
       return new Response(
         JSON.stringify({ error: `เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์: ${err.message}` }),
         { status: 500 }

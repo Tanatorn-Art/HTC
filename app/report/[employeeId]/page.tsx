@@ -103,10 +103,6 @@ export default function ReportDetailPage() {
           <div className="text-sm">มาแล้ว</div>
           <div className="text-xl font-bold">{came} คน</div>
         </div>
-        <div className="bg-yellow-100 text-yellow-900 p-4 rounded-xl shadow">
-          <div className="text-sm">มาสาย</div>
-          <div className="text-xl font-bold">{late} คน</div>
-        </div>
         <div className="bg-red-100 text-red-900 p-4 rounded-xl shadow">
           <div className="text-sm">ไม่มา</div>
           <div className="text-xl font-bold">{absent} คน</div>
