@@ -1,7 +1,6 @@
 import { NextRequest } from 'next/server';
 import db from '@/services/db';
 
-// กำหนด Type ของข้อมูลที่คาดว่าจะได้รับจาก vw_manpower query
 interface SummaryData {
   totalScanned: string;
   totalNotScanned: string;
@@ -9,8 +8,7 @@ interface SummaryData {
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
-  // API นี้จะคาดหวัง parameter ชื่อ 'date'
-  const date = searchParams.get('date'); 
+  const date = searchParams.get('date');
   const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
 
   if (!date || !dateRegex.test(date)) {
@@ -21,25 +19,23 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const result = await db.query<SummaryData>(
-      // *** ใช้ SQL Query ที่ดึงข้อมูลจาก public.vw_manpower ตามที่คุณต้องการ ***
+    const result = await db.query(
       `SELECT
-          COALESCE(SUM(countscan), 0) AS "totalScanned",      -- รวมจำนวนคนที่สแกนแล้วทั้งหมด (จากทุกแผนก)
-          COALESCE(SUM(countnotscan), 0) AS "totalNotScanned" -- รวมจำนวนคนที่ยังไม่สแกนทั้งหมด (จากทุกแผนก)
+          COALESCE(SUM(countscan), 0) AS "totalScanned",      
+          COALESCE(SUM(countnotscan), 0) AS "totalNotScanned" 
        FROM
           public.vw_manpower
        WHERE
           workdate = $1;
       `,
-      [date] // ใช้ 'date' ตรงนี้
+      [date]
     );
 
-    const rawSummary = result.rows[0] || {};
+    const rawSummary = result.rows[0] as SummaryData || {};
 
     const summary = {
-      // แปลงค่าที่ได้เป็นตัวเลข (ควรจะเป็นตัวเลขอยู่แล้วจาก COALESCE และ SUM)
-      totalScanned: parseInt(rawSummary.totalScanned || '0', 10), 
-      totalNotScanned: parseInt(rawSummary.totalNotScanned || '0', 10), 
+      totalScanned: parseInt(rawSummary.totalScanned || '0', 10),
+      totalNotScanned: parseInt(rawSummary.totalNotScanned || '0', 10),
     };
 
     return Response.json(summary);
