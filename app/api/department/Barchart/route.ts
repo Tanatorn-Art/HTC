@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import db from '@/services/db';
 
 interface DepartmentAttendanceRow {
@@ -36,7 +36,7 @@ export async function GET(req: NextRequest) {
        ORDER BY
           deptname;
       `,
-      [selectedDate] // ส่ง selectedDate เป็น parameter $1
+      [selectedDate] 
     );
 
     const departmentDataForChart = result.rows.map((row: DepartmentAttendanceRow) => ({

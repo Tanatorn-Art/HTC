@@ -40,11 +40,21 @@ export async function GET(req: NextRequest) {
 
     return Response.json(summary);
 
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Error fetching attendance summary from vw_manpower:', err);
-    return new Response(
-      JSON.stringify({ error: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์ขณะดึงข้อมูลสรุปการเข้างานจาก vw_manpower' }),
-      { status: 500 }
-    );
+
+    if (err instanceof Error) {
+      // เราสามารถใช้ err.name หรือ err.message ได้
+      return new Response(
+        JSON.stringify({ error: `เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์: ${err.message}` }),
+        { status: 500 }
+      );
+    } else {
+      // หากไม่ใช่ Error object
+      return new Response(
+        JSON.stringify({ error: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์ขณะดึงข้อมูลสรุปการเข้างานจาก vw_manpower' }),
+        { status: 500 }
+      );
+    }
   }
 }
