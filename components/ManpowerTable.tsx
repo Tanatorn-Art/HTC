@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { PiFileMagnifyingGlassBold } from 'react-icons/pi';
 import Spinner from './ui/Spinner'; 
 
-// ตรวจสอบให้แน่ใจว่า Employee Type ในไฟล์นี้ตรงกับโครงสร้างข้อมูลที่ API ส่งมา
 export type Employee = {
   deptcode: string;
   deptname: string;
@@ -157,7 +156,7 @@ export function ManpowerTable({ selectedDate, scanStatus, deptcodelevel1Filter }
 
             // *** เพิ่มฟังก์ชันนี้เพื่อบันทึก selectedDate ลง localStorage ก่อนคลิกลิงก์ ***
             const handleLinkClick = () => {
-              if (typeof window !== 'undefined') { // ตรวจสอบว่าโค้ดรันบน Browser
+              if (typeof window !== 'undefined') { 
                 localStorage.setItem('prevDashboardDate', selectedDate);
     
               }
@@ -177,7 +176,6 @@ export function ManpowerTable({ selectedDate, scanStatus, deptcodelevel1Filter }
                 )}
                 <td className="py-2 px-6">{dept.totalPerson}</td>
                 <td className="p-3">
-                  {/* *** เพิ่ม onClick event ที่เรียก handleLinkClick *** */}
                   <Link href={`/report/${linkDeptcode}?workdate=${linkWorkdate}`} onClick={handleLinkClick}>
                     <PiFileMagnifyingGlassBold size={30} className="text-blue-500 hover:text-blue-700" />
                   </Link>
