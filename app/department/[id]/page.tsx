@@ -4,34 +4,7 @@ import { useEffect, useState } from 'react';
 import { notFound, useParams } from 'next/navigation';
 import { DepartmentTable } from '@/components/DepartmentTable';
 import Spinner from '@/components/ui/Spinner';
-
-type Employee = {
-  employeeId: string;
-  groupid: string;
-  groupname: string;
-  workdate: string;
-  deptcode: number;
-  deptname: string;
-  deptsbu: string;
-  deptstd: string;
-  countscan: number;
-  countnotscan: number;
-  countperson: number;
-};
-
-type EmployeeRaw = {
-  id?: string;
-  groupid?: string;
-  groupname?: string;
-  workdate?: string;
-  deptcode?: number | string;
-  deptname?: string;
-  deptsbu?: string;
-  deptstd?: string;
-  countscan?: number;
-  countnotscan?: number;
-  countperson?: number;
-};
+import type { Employee, ReportApiRawData } from '@/app/types/employee';
 
 export default function DepartmentDetailPage() {
   const params = useParams();
@@ -56,18 +29,20 @@ export default function DepartmentDetailPage() {
 
         const data = await res.json();
 
-        const employees: Employee[] = data.employees.map((emp: EmployeeRaw) => ({
-          employeeId: emp.id ?? '',
+        // แปลง raw data เป็น Employee type
+        const employees: Employee[] = (data.employees as ReportApiRawData[]).map((emp) => ({
+          employeeId: emp.employeeId ?? '',
           groupid: emp.groupid ?? '',
           groupname: emp.groupname ?? '',
           workdate: emp.workdate ?? '',
-          deptcode: Number(emp.deptcode ?? 0),
+          deptcode: emp.deptcode ?? '',
           deptname: emp.deptname ?? '',
           deptsbu: emp.deptsbu ?? '',
           deptstd: emp.deptstd ?? '',
-          countscan: emp.countscan ?? 0,
-          countnotscan: emp.countnotscan ?? 0,
-          countperson: emp.countperson ?? 0,
+          countscan: Number(emp.countscan ?? 0),
+          countnotscan: Number(emp.countnotscan ?? 0),
+          countperson: Number(emp.countperson ?? 0),
+          late: emp.late !== undefined ? Number(emp.late) : undefined,
         }));
 
         setDepartment({ name: data.name, employees });
@@ -97,7 +72,7 @@ export default function DepartmentDetailPage() {
   return (
     <div className="p-6 space-y-4">
       <h1 className="text-2xl font-bold">แผนก : {department.name}</h1>
-      <DepartmentTable employees={department.employees} />
+      <DepartmentTable employees={department.employees} scanStatus="all" />
     </div>
   );
 }

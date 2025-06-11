@@ -1,66 +1,64 @@
-// route.ts
+import { NextRequest, NextResponse } from 'next/server';
+import db from '@/services/db';
 
-import { NextRequest, NextResponse } from 'next/server'
-import db from '@/services/db'
-import { reportDetailQuerySchema, employeeDetailSchema } from '@/lib/validate'
-import { ZodError } from 'zod'
-
-export async function GET(request: NextRequest) {
+export async function GET(req: NextRequest) {
   try {
-    const url = new URL(request.url)
-    const deptcode = url.searchParams.get('deptcode')
-    const employeeId = url.searchParams.get('employeeId')
-    const date = url.searchParams.get('date')
+    console.log('API: Start processing request');
+    const { searchParams } = new URL(req.url);
+    const deptcode = searchParams.get('deptcode');
+    const from = searchParams.get('from');
+    const to = searchParams.get('to');
 
-    if (employeeId) {
-      const parsed = employeeDetailSchema.parse({ employeeId })
+    const today = new Date().toISOString().split('T')[0];
+    const finalFrom = from && from !== 'null' && from !== 'undefined' ? from : today;
+    const finalTo = to && to !== 'null' && to !== 'undefined' ? to : finalFrom;
 
-      const empRes = await db.query(
-        'SELECT name FROM employees WHERE id = $1',
-        [parsed.employeeId]
-      )
-      const recordRes = await db.query(
-        'SELECT workdate, check_in FROM public.vw_manpower_detail WHERE person_code = $1 ORDER BY date DESC',
-        [parsed.employeeId]
-      )
-
-      return NextResponse.json({
-        name: empRes.rows[0]?.name || '',
-        records: recordRes.rows,
-      })
-    }
-
-    const parsed = reportDetailQuerySchema.parse({ deptcode, date })
-    const targetDate = parsed.date || new Date().toISOString().split('T')[0]
-
-    const recordRes = await db.query(
-      `
-      SELECT d.name AS deptname, e.name AS fullname,
-        a.date, a.check_in AS "checkIn", a.check_out AS "checkOut"
-      FROM employees e
-      JOIN department d ON e.department_id = d.id
-      LEFT JOIN attendance a ON a.employee_id = e.id AND a.date = $2
-      WHERE d.id = $1
-      ORDER BY e.name ASC
-      `,
-      [parsed.deptcode, targetDate]
-    )
-
-    return NextResponse.json({
-      deptname: recordRes.rows[0]?.deptname || '',
-      records: recordRes.rows,
-    })
-  } catch (err) {
-    if (err instanceof ZodError) {
+    if (!deptcode || deptcode === 'undefined' || deptcode === 'null' || deptcode === '') {
+      console.error('API Error: Missing or invalid deptcode received:', deptcode);
       return NextResponse.json(
-        { error: err.errors[0]?.message },
+        { error: 'รหัสแผนกไม่ถูกต้อง หรือไม่ได้ระบุ' },
         { status: 400 }
-      )
+      );
     }
-    console.error(err)
+
+    const sql = `
+      SELECT
+        workdate,
+        person_code,
+        deptname,
+        full_name,
+        firstscantime,
+        lastscantime,
+        "PersonType"
+      FROM public.vw_manpower_detail
+      WHERE deptcode = $1
+        AND workdate BETWEEN $2 AND $3
+      ORDER BY workdate, full_name
+    `;
+
+    console.log(`API: Executing SQL with params: deptcode=${deptcode}, from=${finalFrom}, to=${finalTo}`);
+    console.log(`API: SQL Query: ${sql}`);
+
+    const result = await db.query(sql, [deptcode, finalFrom, finalTo]);
+
+    console.log('API: Query executed successfully');
+
+    const deptName = result.rows.length > 0 ? result.rows[0].deptname : 'ไม่พบชื่อแผนก';
+
+    console.log(`API: Found ${result.rows.length} records for deptcode: ${deptcode}`);
+
+    return NextResponse.json(
+      {
+        deptname: deptName,
+        detil: result.rows,
+      },
+      { status: 200 }
+    );
+  } catch (err) {
+    console.error('API Error: attendance/report/detail:', err);
     return NextResponse.json(
       { error: 'เกิดข้อผิดพลาดในฝั่งเซิร์ฟเวอร์' },
       { status: 500 }
-    )
+    );
   }
 }

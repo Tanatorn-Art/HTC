@@ -9,13 +9,15 @@ import {
   LinearScale,
   Tooltip,
   Legend,
+  Title,
   type ChartOptions,
   type AnimationSpec,
 } from 'chart.js';
 import ZoomPlugin from 'chartjs-plugin-zoom';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
 import Spinner from '@/components/ui/Spinner';
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend, ZoomPlugin);
+ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend, Title, ZoomPlugin, ChartDataLabels);
 
 type Props = {
   apiEndpoint: string;
@@ -28,27 +30,46 @@ type DepartmentChartData = {
   notScannedCount: number;
 };
 
-export default function DepartmentBarChart({ apiEndpoint }: Props) {
+export default function DepartmentChartsContainer({ apiEndpoint }: Props) {
   const [data, setData] = useState<DepartmentChartData[]>([]);
   const [loading, setLoading] = useState(true);
-  const [inView, setInView] = useState(false);
-  const chartContainerRef = useRef<HTMLDivElement>(null);
+  const [inViewScanned, setInViewScanned] = useState(false);
+  const [inViewNotScanned, setInViewNotScanned] = useState(false);
 
+  const chartScannedRef = useRef<HTMLDivElement>(null);
+  const chartNotScannedRef = useRef<HTMLDivElement>(null);
+
+  // Intersection Observer สำหรับกราฟสแกนแล้ว
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          setInView(true);
+          setInViewScanned(true);
           observer.disconnect();
         }
       },
       { threshold: 0.3 }
     );
-
-    if (chartContainerRef.current) {
-      observer.observe(chartContainerRef.current);
+    if (chartScannedRef.current) {
+      observer.observe(chartScannedRef.current);
     }
+    return () => observer.disconnect();
+  }, []);
 
+  // Intersection Observer สำหรับกราฟยังไม่สแกน
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setInViewNotScanned(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.3 }
+    );
+    if (chartNotScannedRef.current) {
+      observer.observe(chartNotScannedRef.current);
+    }
     return () => observer.disconnect();
   }, []);
 
@@ -82,24 +103,32 @@ export default function DepartmentBarChart({ apiEndpoint }: Props) {
     );
   }
 
-  if (data.length === 0) {
-    return <div className="text-center text-gray-500">ไม่มีข้อมูลแผนก</div>;
-  }
+  // สร้าง Map สำหรับค้นหาข้อมูล DepartmentChartData จากชื่อแผนกได้อย่างรวดเร็ว
+  const departmentDataMap = new Map<string, DepartmentChartData>();
+  data.forEach(item => {
+    departmentDataMap.set(item.department, item);
+  });
 
-  const chartData = {
-    labels: data.map((d) => d.department),
+  // --- Chart Data for Scanned (Attendance Percentage) ---
+  const allScannedData = data
+    .map((d) => {
+      const totalEmployees = d.scannedCount + d.notScannedCount;
+      const attendancePercentage = totalEmployees > 0 ? (d.scannedCount / totalEmployees) * 100 : 0;
+      return {
+        ...d,
+        attendancePercentage: parseFloat(attendancePercentage.toFixed(2)), // เก็บเป็นเปอร์เซ็นต์ที่มีทศนิยม 2 ตำแหน่ง
+      };
+    })
+    .filter((d) => d.scannedCount > 0) // ยังคงกรองแผนกที่ไม่มีการสแกนสำหรับกราฟนี้
+    .sort((a, b) => b.attendancePercentage - a.attendancePercentage); // เรียงลำดับตามเปอร์เซ็นต์การเข้างาน
+
+  const chartDataScanned = {
+    labels: allScannedData.map((d) => d.department),
     datasets: [
       {
-        label: 'สแกนเข้าแล้ว',
-        data: data.map((d) => d.scannedCount),
+        label: 'เปอร์เซ็นต์การเข้างาน ',
+        data: allScannedData.map((d) => d.attendancePercentage),
         backgroundColor: '#4CAF50',
-        stack: 'Stack 1',
-      },
-      {
-        label: 'ยังไม่สแกน',
-        data: data.map((d) => d.notScannedCount),
-        backgroundColor: '#FFC107',
-        stack: 'Stack 1',
       },
     ],
   };
@@ -109,62 +138,212 @@ export default function DepartmentBarChart({ apiEndpoint }: Props) {
     easing: 'easeOutQuart',
   };
 
-  const options: ChartOptions<'bar'> = {
+  const optionsScanned: ChartOptions<'bar'> = {
+    indexAxis: 'x',
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        position: 'top',
+        display: false,
       },
       title: {
         display: true,
-        text: 'สรุปจำนวนพนักงานที่สแกนเข้าและยังไม่สแกน (รวมแผนกที่ไม่มีการสแกน)',
+        text: 'เปอร์เซ็นต์การเข้างานของพนักงานตามแผนก',
+        position: 'top',
+        align: 'start',
+        font: {
+          size: 16,
+          weight: 'bold',
+        }
       },
       zoom: {
-        pan: {
-          enabled: true,
-          mode: 'x',
-        },
-        zoom: {
-          wheel: {
-            enabled: true,
-          },
-          pinch: {
-            enabled: true,
-          },
-          mode: 'x',
-        },
+        pan: { enabled: true, mode: 'x' },
+        zoom: { wheel: { enabled: false }, pinch: { enabled: false }, mode: 'x' },
       },
+      datalabels: {
+        display: (context) => {
+          const chart = context.chart;
+          const visibleLabels = chart.scales.x.ticks.length;
+          return visibleLabels <= 20; // แสดงป้ายกำกับถ้ามีแถบไม่เกิน 20 แถบ
+        },
+        anchor: 'end',
+        align: 'end',
+        offset: 6,
+        color: '#878787',
+        font: { weight: 'bold' },
+        formatter: (value) => `${value}%`, // จัดรูปแบบเป็นเปอร์เซ็นต์
+      },
+      tooltip: {
+        callbacks: {
+          title: (context) => {
+            return context[0].label; // ชื่อแผนก
+          },
+          label: (context) => {
+            let label = context.dataset.label || '';
+            if (label) {
+              label += ': ';
+            }
+            if (context.parsed.y !== null) {
+              label += `${context.parsed.y.toLocaleString()}%`; // จัดรูปแบบเป็นเปอร์เซ็นต์
+            }
+            return label; // เปอร์เซ็นต์การเข้างาน
+          },
+          afterLabel: (context) => {
+            const departmentName = context.label;
+            const departmentInfo = departmentDataMap.get(departmentName);
+            if (departmentInfo) {
+              const totalEmployees = departmentInfo.scannedCount + departmentInfo.notScannedCount;
+              return `พนักงานในแผนก: ${totalEmployees.toLocaleString()} คน\nสแกนเข้าแล้ว: ${departmentInfo.scannedCount.toLocaleString()} คน`;
+            }
+            return '';
+          }
+        }
+      }
     },
-    animation: inView ? animationOptions : false,
+    animation: inViewScanned ? animationOptions : false,
     scales: {
       x: {
-        stacked: true,
-        title: {
-          display: true,
-          text: 'แผนก',
-        },
+        title: { display: true, text: 'แผนก' },
+        ticks: { autoSkip: false, maxRotation: 90, minRotation: 45 },
       },
       y: {
-        stacked: true,
         beginAtZero: true,
-        ticks: { precision: 0 },
-        title: {
-          display: true,
-          text: 'จำนวนพนักงาน',
-        },
+        max: 100, // ค่าสูงสุดสำหรับเปอร์เซ็นต์คือ 100
+        ticks: { precision: 0, callback: (value) => `${value}%` }, // จัดรูปแบบแกน Y เป็นเปอร์เซ็นต์
+        title: { display: true, text: 'เปอร์เซ็นต์ (%)' },
       },
     },
   };
 
+  // --- Chart Data for Not Scanned (now Not Scanned Percentage) ---
+  const allNotScannedData = data
+    .map((d) => {
+      const totalEmployees = d.scannedCount + d.notScannedCount;
+      const notScannedPercentage = totalEmployees > 0 ? (d.notScannedCount / totalEmployees) * 100 : 0;
+      return {
+        ...d,
+        notScannedPercentage: parseFloat(notScannedPercentage.toFixed(2)), // เก็บเป็นเปอร์เซ็นต์ที่มีทศนิยม 2 ตำแหน่ง
+      };
+    })
+    .filter((d) => d.notScannedCount > 0) // กรองแผนกที่ไม่มีพนักงานยังไม่สแกน
+    .sort((a, b) => b.notScannedPercentage - a.notScannedPercentage); // เรียงตามเปอร์เซ็นต์ที่ยังไม่สแกน
+
+  const chartDataNotScanned = {
+    labels: allNotScannedData.map((d) => d.department),
+    datasets: [
+      {
+        label: 'เปอร์เซ็นต์ยังไม่สแกน ',
+        data: allNotScannedData.map((d) => d.notScannedPercentage),
+        backgroundColor: '#FFC107',
+      },
+    ],
+  };
+
+  const optionsNotScanned: ChartOptions<'bar'> = {
+    indexAxis: 'x',
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: false,
+      },
+      title: {
+        display: true,
+        text: 'เปอร์เซ็นต์พนักงานที่ยังไม่สแกนตามแผนก',
+        position: 'top',
+        align: 'start',
+        font: {
+          size: 16,
+          weight: 'bold',
+        }
+      },
+      zoom: {
+        pan: { enabled: true, mode: 'x' },
+        zoom: { wheel: { enabled: false }, pinch: { enabled: false }, mode: 'x' },
+      },
+      datalabels: {
+        display: (context) => {
+          const chart = context.chart;
+          const visibleLabels = chart.scales.x.ticks.length;
+          return visibleLabels <= 20;
+        },
+        anchor: 'end',
+        align: 'end',
+        offset: 6,
+        color: '#878787',
+        font: { weight: 'bold' },
+        formatter: (value) => `${value}%`, // จัดรูปแบบเป็นเปอร์เซ็นต์
+      },
+      tooltip: {
+        callbacks: {
+          title: (context) => {
+            return context[0].label; // ชื่อแผนก
+          },
+          label: (context) => {
+            let label = context.dataset.label || '';
+            if (label) {
+              label += ': ';
+            }
+            if (context.parsed.y !== null) {
+              label += `${context.parsed.y.toLocaleString()}%`; // จัดรูปแบบเป็นเปอร์เซ็นต์
+            }
+            return label; // เปอร์เซ็นต์ยังไม่สแกน
+          },
+          afterLabel: (context) => {
+            const departmentName = context.label;
+            const departmentInfo = departmentDataMap.get(departmentName);
+            if (departmentInfo) {
+              const totalEmployees = departmentInfo.scannedCount + departmentInfo.notScannedCount;
+              return `พนักงานในแผนก: ${totalEmployees.toLocaleString()} คน\nยังไม่สแกน: ${departmentInfo.notScannedCount.toLocaleString()} คน`;
+            }
+            return '';
+          }
+        }
+      }
+    },
+    animation: inViewNotScanned ? animationOptions : false,
+    scales: {
+      x: {
+        title: { display: true, text: 'แผนก' },
+        ticks: { autoSkip: false, maxRotation: 90, minRotation: 45 },
+      },
+      y: {
+        beginAtZero: true,
+        max: 100, // ค่าสูงสุดสำหรับเปอร์เซ็นต์คือ 100
+        ticks: { precision: 0, callback: (value) => `${value}%` }, // จัดรูปแบบแกน Y เป็นเปอร์เซ็นต์
+        title: { display: true, text: 'เปอร์เซ็นต์ (%)' },
+      },
+    },
+  };
+
+  if (allScannedData.length === 0 && allNotScannedData.length === 0) {
+    return <div className="text-center text-gray-500">ไม่พบข้อมูลสำหรับแสดงกราฟ</div>;
+  }
+
+  // คำนวณความกว้างของกราฟตามจำนวนแถบเพื่อให้กราฟอ่านง่ายขึ้น
+  const maxDepartments = Math.max(allScannedData.length, allNotScannedData.length);
+  const baseBarWidth = 50; // ปรับได้ตามความเหมาะสม
+  const calculatedChartWidth = Math.max(400, maxDepartments * baseBarWidth);
+
   return (
-    <div className="bg-white p-4 rounded-lg shadow" ref={chartContainerRef}>
-      <h2 className="text-lg font-semibold mb-4">
-        สรุปจำนวนพนักงานแต่ละแผนก (สแกนเข้า / ยังไม่สแกน)
-      </h2>
-      <div style={{ height: '500px' }}>
-        <Bar data={chartData} options={options} />
-      </div>
+    <div className="flex flex-col md:flex-row gap-8 justify-center items-start">
+      {/* กราฟสำหรับเปอร์เซ็นต์การเข้างาน */}
+      {allScannedData.length > 0 && (
+        <div className="bg-white p-4 rounded-lg shadow w-full md:w-1/2 overflow-x-auto" ref={chartScannedRef}>
+          <div style={{ height: '400px', width: `${calculatedChartWidth}px` }}>
+            <Bar data={chartDataScanned} options={optionsScanned} />
+          </div>
+        </div>
+      )}
+
+      {/* กราฟสำหรับเปอร์เซ็นต์ยังไม่สแกน */}
+      {allNotScannedData.length > 0 && (
+        <div className="bg-white p-4 rounded-lg shadow w-full md:w-1/2 overflow-x-auto" ref={chartNotScannedRef}>
+          <div style={{ height: '400px', width: `${calculatedChartWidth}px` }}>
+            <Bar data={chartDataNotScanned} options={optionsNotScanned} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -4,8 +4,7 @@ import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic'; 
 import AttendanceTextSummary from '@/components/AttendanceTextSummary';
 import AttendanceCardSummary from '@/components/AttendanceCardSummary';
-import { ManpowerTable }  from '@/components/ManpowerTable';
-
+import { ManpowerTable } from '@/components/ManpowerTable'; 
 
 const DepartmentBarChart = dynamic(
   () => import('@/components/DepartmentBarChart'),
@@ -13,9 +12,22 @@ const DepartmentBarChart = dynamic(
 );
 
 export default function DashboardPage() {
-  const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [selectedDate, setSelectedDate] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const storedDate = localStorage.getItem('prevDashboardDate');
+      if (storedDate) {
+        localStorage.removeItem('prevDashboardDate');
+        return storedDate;
+      }
+    }
+    return new Date().toISOString().split('T')[0];
+  });
+
   const [totalScanned, setTotalScanned] = useState(0);
   const [totalNotScanned, setTotalNotScanned] = useState(0);
+
+  // *** เพิ่ม state สำหรับเลือกโรงงาน ***
+  const [selectedFactory, setSelectedFactory] = useState('all'); 
 
   type SummaryData = {
     totalScanned: number;    
@@ -79,7 +91,29 @@ export default function DashboardPage() {
 
       <section className="space-y-4">
         <h1 className="text-xl font-semibold">Manpower Monitoring</h1>
-        <ManpowerTable selectedDate={selectedDate} />     
+        
+        {/* Dropdown สำหรับเลือกโรงงาน */}
+        <div className="mb-4">
+          <label htmlFor="factorySelect" className="block text-gray-700 font-medium mb-2">เลือกโรงงาน:</label>
+          <select
+            id="factorySelect"
+            value={selectedFactory}
+            onChange={(e) => setSelectedFactory(e.target.value)}
+            className="mt-1 block border px-3 py-2 rounded-md shadow-sm focus:outline-none focus:ring focus:border-blue-300"
+          >
+            <option value="all">ทั้งหมด</option>
+            <option value="06">โรงงาน 1 ("06")</option>
+            <option value="07">โรงงาน 2 ("07")</option>
+            <option value="08">โรงงาน 3 ("08")</option> 
+          </select>
+        </div>
+
+        {/* แสดง ManpowerTable โดยส่ง deptcodelevel1Filter ตามที่ผู้ใช้เลือก */}
+        <ManpowerTable 
+          selectedDate={selectedDate} 
+          scanStatus="" 
+          deptcodelevel1Filter={selectedFactory === 'all' ? undefined : selectedFactory} 
+        />
       </section>
     </div>
   );

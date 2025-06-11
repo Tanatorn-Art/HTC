@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ReportFilterForm from '@/components/ReportFilterForm';
 import { DepartmentTable } from '@/components/DepartmentTable';
 import Spinner from '@/components/ui/Spinner';
 import Papa from 'papaparse';
+import { Employee, ReportApiRawData } from '../types/employee';
 
 type Filters = {
   date: string;
@@ -12,53 +13,108 @@ type Filters = {
   employeeId: string;
 };
 
-type Record = {
-  workdate: string;
-  groupid: string;
-  groupname: string;
-  deptcode: number;
-  deptname: string;
-  deptsbu: string;
-  deptstd: string;
-  scan: number;
-  noscan: number;
-  late: number;
-  employeeId: string;
-};
+// Key สำหรับเก็บ Filters ใน sessionStorage
+const SESSION_STORAGE_FILTERS_KEY = 'reportPageFilters';
 
 export default function ReportPage() {
-  const [records, setRecords] = useState<Record[]>([]);
+  const [records, setRecords] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const initialFilters: Filters = {
-    date: new Date().toISOString().slice(0, 10),  
-    departmentId: '',
-    employeeId: '',
-  };
+  // *** ปรับปรุง useState สำหรับ Filters โดยโหลดจาก sessionStorage ***
+  const [currentFilters, setCurrentFilters] = useState<Filters>(() => {
+    if (typeof window !== 'undefined') {
+      const savedFilters = sessionStorage.getItem(SESSION_STORAGE_FILTERS_KEY);
+      if (savedFilters) {
+        try {
+          return JSON.parse(savedFilters);
+        } catch (e) {
+          console.error('Failed to parse saved filters from sessionStorage:', e);
+          // Fallback ถ้า parse ไม่ได้
+          return {
+            date: new Date().toISOString().slice(0, 10),
+            departmentId: '',
+            employeeId: 'all',
+          };
+        }
+      }
+    }
+    // ค่าเริ่มต้นถ้าไม่มีใน sessionStorage
+    return {
+      date: new Date().toISOString().slice(0, 10),
+      departmentId: '',
+      employeeId: 'all',
+    };
+  });
 
   const handleSearch = async (newFilters: Filters) => {
-    setLoading(true);
-
-    const params = new URLSearchParams({
-      date: newFilters.date || '',
-      departmentId: newFilters.departmentId || '',
-      employeeId: newFilters.employeeId || '',
-    }).toString();
-
-    const res = await fetch(`/api/attendance/report?${params}`);
-    const data = await res.json();
-
-    if (Array.isArray(data)) {
-      setRecords(data);
-    } else {
-      console.error('Unexpected data format:', data);
-      setRecords([]);
+    console.log('ReportPage: Searching with filters:', newFilters);
+    setCurrentFilters(newFilters);
+    // *** บันทึก Filters ลง sessionStorage ทันทีที่มีการค้นหาใหม่ ***
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem(SESSION_STORAGE_FILTERS_KEY, JSON.stringify(newFilters));
     }
-
-    setLoading(false);
   };
 
+  useEffect(() => {
+    async function fetchReportData() {
+      setLoading(true);
+
+      const params = new URLSearchParams({
+        date: currentFilters.date || '',
+        departmentId: currentFilters.departmentId || '',
+        employeeId: currentFilters.employeeId || '',
+      }).toString();
+
+      try {
+        const res = await fetch(`/api/attendance/report?${params}`);
+        if (!res.ok) {
+          const errorData = await res.json();
+          throw new Error(errorData.error || 'Failed to fetch report data');
+        }
+        const rawData: ReportApiRawData[] = await res.json();
+
+        const mappedRecords: Employee[] = rawData.map((rec) => {
+          const deptCodeFinal = rec.deptcode || '';
+          const countScanNum = parseInt(rec.countscan?.toString() || '0', 10);
+          const countNotScanNum = parseInt(rec.countnotscan?.toString() || '0', 10);
+          const countPersonNum = parseInt(rec.countperson?.toString() || '0', 10);
+
+          return {
+            workdate: rec.workdate || '',
+            groupid: rec.groupid || '',
+            groupname: rec.groupname || '',
+            deptcode: deptCodeFinal,
+            deptname: rec.deptname || '',
+            deptsbu: rec.deptsbu || '',
+            deptstd: rec.deptstd || '',
+            countscan: countScanNum,
+            countnotscan: countNotScanNum,
+            countperson: countPersonNum,
+            employeeId: rec.employeeId || '',
+          };
+        });
+
+        console.log('ReportPage: Mapped Records before setting state:', mappedRecords);
+
+        setRecords(mappedRecords);
+      } catch (err) {
+        console.error('ReportPage: Error fetching attendance report:', err);
+        setRecords([]);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    // *** เรียก fetchReportData ทันทีเมื่อ currentFilters เปลี่ยนแปลง ***
+    // รวมถึงตอนที่โหลด initial filters จาก sessionStorage ด้วย
+    fetchReportData();
+  }, [currentFilters]); // Dependency array: fetch data เมื่อ currentFilters เปลี่ยนแปลง
+
   const handleExportCSV = () => {
+    if (records.length === 0) {
+      alert('ไม่มีข้อมูลให้ Export');
+      return;
+    }
     const csv = Papa.unparse(records);
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
@@ -66,12 +122,13 @@ export default function ReportPage() {
     link.href = url;
     link.download = 'attendance_report.csv';
     link.click();
+    URL.revokeObjectURL(url);
   };
 
   return (
     <div className="p-6 space-y-4">
       <h1 className="text-2xl font-bold">รายงานการเข้างาน</h1>
-      <ReportFilterForm onSearch={handleSearch} initialFilters={initialFilters} />
+      <ReportFilterForm onSearch={handleSearch} initialFilters={currentFilters} />
 
       {loading ? (
         <Spinner />
@@ -80,21 +137,12 @@ export default function ReportPage() {
       ) : (
         <>
           <DepartmentTable
-            employees={records.map((rec) => ({
-              workdate: rec.workdate || '',
-              deptcode: rec.deptcode,
-              deptname: rec.deptname,
-              deptsbu: rec.deptsbu || '',
-              deptstd: rec.deptstd || '',
-              countscan: rec.scan || 0,
-              countnotscan: rec.noscan || 0,
-              countperson: 1,
-              employeeId: rec.employeeId,
-            }))}
+            employees={records}
+            scanStatus={currentFilters.employeeId}
           />
           <button
             onClick={handleExportCSV}
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 mt-4"
           >
             Export CSV
           </button>
