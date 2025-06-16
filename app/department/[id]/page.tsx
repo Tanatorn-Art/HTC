@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { notFound, useParams } from 'next/navigation';
 import { DepartmentTable } from '@/components/DepartmentTable';
 import Spinner from '@/components/ui/Spinner';
-import type { Employee, ReportApiRawData } from '@/app/types';
+import type { Employee, ReportApiRawData } from '@/app/types/employee';
 
 export default function DepartmentDetailPage() {
   const params = useParams();

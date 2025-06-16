@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { PiFileMagnifyingGlassBold } from "react-icons/pi";
-import { Employee } from '../app/types';
+import { Employee } from '../app/types/employee';
 
 export type DepartmentTableProps = {
   employees: Employee[];

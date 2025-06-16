@@ -5,7 +5,7 @@ import ReportFilterForm from '@/components/ReportFilterForm';
 import { DepartmentTable } from '@/components/DepartmentTable';
 import Spinner from '@/components/ui/Spinner';
 import Papa from 'papaparse';
-import { Employee, ReportApiRawData } from '../types';
+import { Employee, ReportApiRawData } from '../types/employee';
 
 type Filters = {
   date: string;

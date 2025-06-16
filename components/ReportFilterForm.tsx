@@ -1,29 +1,29 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { ReportApiRawData } from '@/app/types';
+import { ReportApiRawData } from '@/app/types/employee'; 
 
-// ปรับปรุงชื่อ Prop ให้ตรงกับการใช้งานจริง
 type Props = {
-  onSearch: (filters: { date: string; departmentId: string; scanStatus: string }) => void;
+  onSearch: (filters: { date: string; departmentId: string; employeeId: string }) => void;
   initialFilters: {
     date: string;
     departmentId: string;
-    scanStatus: string;
+    employeeId: string; 
   };
 };
 
 type DepartmentForDropdown = {
-  deptcode: string; // เรายังเก็บ deptcode ไว้เพื่อใช้ส่งค่ากลับไปเมื่อเลือก
+  deptcode: string;
   deptname: string;
 };
 
 const ReportFilterForm = ({ onSearch, initialFilters }: Props) => {
   const [date, setDate] = useState(initialFilters.date);
   const [departmentId, setDepartmentId] = useState(initialFilters.departmentId);
-  const [scanStatus, setScanStatus] = useState(initialFilters.scanStatus);
+  const [scanStatus, setScanStatus] = useState(initialFilters.employeeId); 
 
   const [departments, setDepartments] = useState<DepartmentForDropdown[]>([]);
+
   const [loadingDepartments, setLoadingDepartments] = useState(true);
 
   useEffect(() => {
@@ -35,25 +35,22 @@ const ReportFilterForm = ({ onSearch, initialFilters }: Props) => {
         }
         return res.json();
       })
-      .then((data: ReportApiRawData[]) => {
+      .then((data: ReportApiRawData[]) => { 
+        // *** บล็อกนี้เป็นบล็อกเดียวที่จำเป็นตามการตอบกลับของ API ของคุณ ***
         if (Array.isArray(data)) {
-          const uniqueDepartmentsForDropdown: DepartmentForDropdown[] = [];
-          const seenDeptnames = new Set<string>(); // ใช้ Set เพื่อเก็บ deptname ที่เห็นแล้ว
+          const uniqueDepartments: DepartmentForDropdown[] = [];
+          const seenDeptcodes = new Set<string>();
 
           data.forEach(item => {
             const code = item.deptcode;
             const name = item.deptname;
 
-            // ตรวจสอบว่า deptname และ deptcode มีค่า และ deptname ยังไม่เคยถูกเพิ่มเข้ามา
-            if (code && name && !seenDeptnames.has(name)) {
-              uniqueDepartmentsForDropdown.push({ deptcode: code, deptname: name });
-              seenDeptnames.add(name); // เพิ่ม deptname เข้าไปใน Set
+            if (code && name && !seenDeptcodes.has(code)) {
+              uniqueDepartments.push({ deptcode: code, deptname: name });
+              seenDeptcodes.add(code);
             }
           });
-          // หากต้องการเรียงลำดับตามตัวอักษร
-          uniqueDepartmentsForDropdown.sort((a, b) => a.deptname.localeCompare(b.deptname));
-
-          setDepartments(uniqueDepartmentsForDropdown);
+          setDepartments(uniqueDepartments);
         } else {
           console.warn('รูปแบบข้อมูลแผนกไม่ถูกต้อง: ข้อมูลไม่ใช่ Array', data);
           setDepartments([]);
@@ -70,7 +67,7 @@ const ReportFilterForm = ({ onSearch, initialFilters }: Props) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSearch({ date, departmentId, scanStatus });
+    onSearch({ date, departmentId, employeeId: scanStatus });
   };
 
   return (
@@ -78,23 +75,20 @@ const ReportFilterForm = ({ onSearch, initialFilters }: Props) => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* ช่องเลือกวันที่ */}
         <div>
-          <label htmlFor="date-input" className="block mb-1 font-medium text-gray-700">วันที่</label>
+          <label className="block mb-1 font-medium">วันที่</label>
           <input
-            id="date-input"
             type="date"
-            className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
+            className="w-full border rounded px-2 py-1"
             value={date}
             onChange={(e) => setDate(e.target.value)}
             required
           />
         </div>
 
-        {/* ช่องเลือกแผนก */}
         <div>
-          <label htmlFor="department-select" className="block mb-1 font-medium text-gray-700">แผนก</label>
+          <label className="block mb-1 font-medium">แผนก</label>
           <select
-            id="department-select"
-            className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm disabled:bg-gray-100 disabled:text-gray-500"
+            className="w-full border rounded px-2 py-1"
             value={departmentId}
             onChange={(e) => {
               setDepartmentId(e.target.value);
@@ -104,20 +98,18 @@ const ReportFilterForm = ({ onSearch, initialFilters }: Props) => {
             <option key="default-department" value="">
               {loadingDepartments ? 'กำลังโหลดแผนก...' : '-- ทั้งหมด --'}
             </option>
-            {departments.map((d) => (
-              <option key={`department-${d.deptcode}`} value={d.deptcode}>
+            {departments.map((d, idx) => (
+              <option key={`department-${d.deptcode}-${idx}`} value={d.deptcode}>
                 {d.deptname}
               </option>
             ))}
           </select>
         </div>
-
-        {/* ช่องเลือกสถานะการสแกน */}
+        
         <div>
-          <label htmlFor="scan-status-select" className="block mb-1 font-medium text-gray-700">สถานะ</label>
+          <label className="block mb-1 font-medium">สถานะ</label>
           <select
-            id="scan-status-select"
-            className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
+            className="w-full border rounded px-2 py-1"
             value={scanStatus}
             onChange={(e) => setScanStatus(e.target.value)}
           >
@@ -133,10 +125,7 @@ const ReportFilterForm = ({ onSearch, initialFilters }: Props) => {
           </select>
         </div>
       </div>
-      <button
-        type="submit"
-        className="bg-blue-600 text-white px-5 py-2.5 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 shadow-sm transition-colors duration-200"
-      >
+      <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
         ค้นหา
       </button>
     </form>

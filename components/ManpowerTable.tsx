@@ -1,54 +1,60 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { PiFileMagnifyingGlassBold } from 'react-icons/pi';
-// Import HierarchicalDepartment type from your types file
-import { HierarchicalDepartment as RawDepartmentData } from '@/app/types'; // <--- IMPORT HERE
+import Spinner from './ui/Spinner'; // ตรวจสอบเส้นทางว่าถูกต้องหรือไม่
 
-// Changed Employee type to reflect the actual API response type HierarchicalDepartment
-// We use a different name "RawDepartmentData" for clarity to distinguish it from the aggregated type
-export type Employee = RawDepartmentData; 
+// ตรวจสอบให้แน่ใจว่า Employee Type ในไฟล์นี้ตรงกับโครงสร้างข้อมูลที่ API ส่งมา
+export type Employee = {
+  deptcode: string;
+  deptname: string;
+  deptsbu: string;
+  deptstd: string;
+  countscan: string; // อาจเป็น string จาก API
+  countnotscan: string; // อาจเป็น string จาก API
+  countperson: string; // อาจเป็น string จาก API
+  workdate: string;
+  deptcodelevel1: string;
+  deptcodelevel2: string;
+  deptcodelevel3: string;
+  deptcodelevel4: string;
+  parentcode: string | null;
+  PersonType: string | null;
+  PersonGroup: string | null;
+};
 
 type ManpowerTableProps = {
   selectedDate: string;
   scanStatus: string;
+  deptcodelevel1Filter?: string;
 };
 
 type AggregatedDepartment = {
   deptcode: string;
-  deptname: string; // This will hold the extracted simple department name (e.g., "IT")
-  totalScanned: number; // Changed to number to match internal calculations
-  totalNotScanned: number; // Changed to number to match internal calculations
-  totalPerson: number; // Changed to number to match internal calculations
-  level: number; // This will hold the 'min_level' value from API
+  deptname: string;
+  deptsbu: string;
+  deptstd: string;
+  totalScanned: number;
+  totalNotScanned: number;
+  totalPerson: number;
 };
 
-const INITIAL_LOAD_LIMIT = 20;
-const LOAD_MORE_STEP = 20;
-
-export function ManpowerTable({ selectedDate, scanStatus }: ManpowerTableProps) {
-  // Use RawDepartmentData for the state that holds raw API response
-  const [employees, setEmployees] = useState<RawDepartmentData[]>([]);
+export function ManpowerTable({ selectedDate, scanStatus, deptcodelevel1Filter }: ManpowerTableProps) {
+  const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [limit, setLimit] = useState<number>(INITIAL_LOAD_LIMIT);
-
-  const observerTarget = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchEmployees = async () => {
       setLoading(true);
       setError(null);
-      setLimit(INITIAL_LOAD_LIMIT);
       try {
         const response = await fetch(`/api/department?date=${selectedDate}`);
         if (!response.ok) {
           throw new Error('Failed to fetch employees');
         }
-        // Cast data to RawDepartmentData[] to match the state type
-        const data: RawDepartmentData[] = await response.json(); 
-        console.log("1. Raw API Data received (employees state):", data); // DEBUG LOG
+        const data: Employee[] = await response.json();
         setEmployees(data);
       } catch (err) {
         if (err instanceof Error) {
@@ -64,191 +70,145 @@ export function ManpowerTable({ selectedDate, scanStatus }: ManpowerTableProps) 
     fetchEmployees();
   }, [selectedDate]);
 
-  // Helper function to extract the simple department name from hierarchy
-  const getSimpleDeptName = (hierarchy: string | null | undefined): string => {
-    if (!hierarchy || typeof hierarchy !== 'string') {
-      console.log("getSimpleDeptName: Invalid or empty hierarchy input:", hierarchy); // DEBUG LOG
-      return '';
-    }
-    const trimmedHierarchy = hierarchy.trim();
-    const parts = trimmedHierarchy.split(' → ');
-    const simpleName = parts[parts.length - 1].trim();
-    console.log("getSimpleDeptName: Input:", hierarchy, "| Output:", simpleName); // DEBUG LOG
-    return simpleName;
-  };
-
   const aggregatedDepartments = useMemo<AggregatedDepartment[]>(() => {
     const departmentMap = new Map<string, AggregatedDepartment>();
 
-    if (employees && employees.length > 0) {
-      employees.forEach(emp => { // emp is now RawDepartmentData type
-        let currentDept = departmentMap.get(emp.deptcode);
-        
-        const simpleDeptName = getSimpleDeptName(emp.hierarchy);
+    employees.forEach(emp => {
+      // กรองตาม deptcodelevel1Filter ถ้ามี
+      if (deptcodelevel1Filter && emp.deptcodelevel1 !== deptcodelevel1Filter) {
+        return;
+      }
 
-        if (!currentDept) {
-          currentDept = {
-            deptcode: emp.deptcode,
-            deptname: simpleDeptName,
-            totalScanned: Number(emp.countscan), // Convert to Number here
-            totalNotScanned: Number(emp.countnotscan), // Convert to Number here
-            totalPerson: Number(emp.countperson), // Convert to Number here
-            level: emp.min_level, // <--- Use emp.min_level from HierarchicalDepartment
-          };
-          departmentMap.set(emp.deptcode, currentDept);
-        } else {
-          if (!currentDept.deptname && simpleDeptName) {
-              currentDept.deptname = simpleDeptName;
-          }
-          // Ensure level is set, using min_level
-          if (currentDept.level === undefined || currentDept.level === null) {
-              currentDept.level = emp.min_level; // <--- Use emp.min_level
-          }
-          // Aggregate counts, ensuring they are numbers
-          currentDept.totalScanned += Number(emp.countscan);
-          currentDept.totalNotScanned += Number(emp.countnotscan);
-          currentDept.totalPerson += Number(emp.countperson);
-        }
-      });
-    }
+      let currentDept = departmentMap.get(emp.deptcode);
+      if (!currentDept) {
+        currentDept = {
+          deptcode: emp.deptcode,
+          deptname: emp.deptname,
+          deptsbu: emp.deptsbu,
+          deptstd: emp.deptstd,
+          totalScanned: 0,
+          totalNotScanned: 0,
+          totalPerson: 0,
+        };
+        departmentMap.set(emp.deptcode, currentDept);
+      }
 
-    const result = Array.from(departmentMap.values()).sort((a, b) => {
-        if (a.deptcode < b.deptcode) return -1;
-        if (a.deptcode > b.deptcode) return 1;
-        return a.level - b.level; // Sort by level
+      // แปลงค่า string เป็น number ก่อนบวก
+      currentDept.totalScanned += Number(emp.countscan || '0');
+      currentDept.totalNotScanned += Number(emp.countnotscan || '0');
+      currentDept.totalPerson += Number(emp.countperson || '0');
     });
-    console.log("2. Aggregated Departments (after processing & sorting):", result.map(d => ({ deptcode: d.deptcode, deptname: d.deptname, level: d.level, totalScanned: d.totalScanned, totalNotScanned: d.totalNotScanned, totalPerson: d.totalPerson }))); // DEBUG LOG
-    return result;
-  }, [employees]);
+
+    return Array.from(departmentMap.values());
+  }, [employees, deptcodelevel1Filter]);
 
   const filteredDepartments = useMemo(() => {
-    let departments = aggregatedDepartments;
     if (scanStatus === 'scanned') {
-      departments = departments.filter(dept => dept.totalScanned > 0);
+      return aggregatedDepartments.filter(dept => dept.totalScanned > 0);
     }
     if (scanStatus === 'not_scanned') {
-      departments = departments.filter(dept => dept.totalNotScanned > 0);
+      return aggregatedDepartments.filter(dept => dept.totalNotScanned > 0);
     }
-    console.log("3. Filtered Departments (after scanStatus filter):", departments.map(d => ({ deptcode: d.deptcode, deptname: d.deptname, totalScanned: d.totalScanned, totalNotScanned: d.totalNotScanned }))); // DEBUG LOG
-    return departments;
+    return aggregatedDepartments;
   }, [aggregatedDepartments, scanStatus]);
 
-  const departmentsToDisplay = useMemo(() => {
-    const slicedDeps = filteredDepartments.slice(0, limit);
-    console.log("4. Departments to Display (sliced for limit):", slicedDeps.map(d => ({ deptcode: d.deptcode, deptname: d.deptname, level: d.level, totalPerson: d.totalPerson }))); // DEBUG LOG
-    return slicedDeps;
-  }, [filteredDepartments, limit]);
-
-  const loadMoreItems = useCallback(() => {
-    setLimit(prevLimit => prevLimit + LOAD_MORE_STEP);
-  }, []);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && limit < filteredDepartments.length) {
-          loadMoreItems();
-        }
-      },
-      { threshold: 1.0 }
+  // --- UI สำหรับ Loading, Error, No Data ---
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center p-8">
+        <Spinner />
+        <span className="ml-2 text-gray-600">กำลังโหลดข้อมูล...</span>
+      </div>
     );
-
-    const currentObserverTarget = observerTarget.current;
-
-    if (currentObserverTarget) {
-      observer.observe(currentObserverTarget);
-    }
-
-    return () => {
-      if (currentObserverTarget) {
-        observer.unobserve(currentObserverTarget);
-      }
-    };
-  }, [limit, filteredDepartments.length, loadMoreItems]);
-
-  useEffect(() => {
-    setLimit(INITIAL_LOAD_LIMIT);
-  }, [selectedDate, scanStatus]);
-
-
-  if (error) {
-    return <div className="text-red-500">Error: {error}</div>;
   }
 
-  const getPaddingClass = (level: number) => {
-      const paddingUnit = 6;
-      const calculatedPadding = (level + 1) * paddingUnit;
-      return `pl-${calculatedPadding}`;
-  };
+  if (error) {
+    return (
+      <div className="text-center text-red-500 bg-red-100 p-4 rounded-lg shadow-sm m-4">
+        <p className="font-semibold">เกิดข้อผิดพลาดในการดึงข้อมูล</p>
+        <p className="text-sm">{error}</p>
+      </div>
+    );
+  }
+
+  if (filteredDepartments.length === 0) {
+    return (
+      <div className="text-center py-8 text-gray-500 bg-white rounded-xl shadow-md m-4">
+        <p className="text-lg">ไม่พบข้อมูลสำหรับวันที่เลือก หรือตัวกรองที่ระบุ</p>
+        <p className="text-sm mt-2">โปรดลองเลือกวันที่อื่น หรือปรับตัวกรอง</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="overflow-x-auto bg-white rounded-xl shadow p-4">
-      {filteredDepartments.length === 0 ? (
-        <div className="text-center py-4 text-gray-500">
-          ไม่พบข้อมูลสำหรับวันที่หรือเงื่อนไขการสแกนที่เลือก
-        </div>
-      ) : (
-        <>
-          <table className="min-w-full text-sm border-collapse">
-            <thead className="border-b text-gray-600">
-              <tr>
-                <th className="py-2 px-6 text-left">DEPARTMENT / SUB-DEPARTMENT</th>
-                {scanStatus !== 'not_scanned' && (<th className="py-2 px-6 text-right">SCANNED IN</th>)}
-                {scanStatus !== 'scanned' && (<th className="py-2 px-6 text-right">NOT SCANNED IN</th>)}
-                <th className="py-2 px-6 text-right">TOTAL EMPLOYEES</th>
-                <th className="p-0">ดูรายละเอียด</th>
+    // ปรับปรุง div หลักให้มีเงาและกรอบโค้งมนตามสไตล์ Google
+    <div className="overflow-x-auto bg-white rounded-2xl shadow-xl p-6">
+      <table className="min-w-full text-sm text-left border-collapse">
+        {/* Header ของตาราง: สีเทาอ่อน, ตัวอักษรหนา, โค้งมนด้านบน */}
+        <thead className="bg-gray-50 text-gray-700 tracking-wider rounded-t-lg">
+          <tr>
+            <th className="py-3 px-6">Deptcode</th>
+            <th className="py-3 px-6">Deptname</th>
+            <th className="py-3 px-6">SBU</th>
+            <th className="py-3 px-6">STD</th>
+            {scanStatus !== 'not_scanned' && (
+              <th className="py-3 px-6">Scan</th>
+            )}
+            {scanStatus !== 'scanned' && (
+              <th className="py-3 px-6 ">No scan</th>
+            )}
+            <th className="py-3 px-6">Person</th>
+            <th className="p-3 ">Detail</th>
+          </tr>
+        </thead>
+        <tbody>
+          {filteredDepartments.map((dept, index) => {
+            const linkDeptcode = dept.deptcode;
+            const linkWorkdate = selectedDate;
+
+            // ฟังก์ชันสำหรับบันทึก selectedDate ลง localStorage ก่อนคลิกลิงก์
+            const handleLinkClick = () => {
+              if (typeof window !== 'undefined') {
+                localStorage.setItem('prevDashboardDate', selectedDate);
+              }
+            };
+
+            return (
+              <tr
+                key={dept.deptcode} // Key ควรเป็นค่าที่ unique เช่น deptcode
+                // เพิ่มสีพื้นหลังสลับกัน และเพิ่มเส้นขอบล่างที่ดูบางเบา
+                className={`
+                  ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}
+                  ${index === filteredDepartments.length - 1 ? '' : 'border-b border-gray-100'}
+                  hover:bg-gray-100 transition-colors duration-150
+                `}
+              >
+                <td className="py-3 px-6 text-gray-800">{dept.deptcode}</td>
+                <td className="py-3 px-6 text-gray-800">{dept.deptname}</td>
+                <td className="py-3 px-5 text-gray-800">{dept.deptsbu}</td>
+                <td className="py-3 px-6 text-gray-800">{dept.deptstd}</td>
+                {scanStatus !== 'not_scanned' && (
+                  <td className="py-3 px-6 text-gray-800">{dept.totalScanned}</td>
+                )}
+                {scanStatus !== 'scanned' && (
+                  <td className="py-3 px-6 text-gray-800">{dept.totalNotScanned}</td>
+                )}
+                <td className="py-3 px-6 text-gray-800">{dept.totalPerson}</td>
+                <td className="p-3">
+                  <Link
+                    href={`/report/${encodeURIComponent(linkDeptcode)}?workdate=${encodeURIComponent(linkWorkdate)}`}
+                    onClick={handleLinkClick}
+                    className="flex items-center justify-center" // จัดไอคอนให้อยู่ตรงกลาง
+                    title="ดูรายละเอียดการสแกนของแผนกนี้"
+                  >
+                    <PiFileMagnifyingGlassBold size={24} className="text-blue-600 hover:text-blue-800 transition-colors duration-200" />
+                  </Link>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {departmentsToDisplay.map((dept) => {
-                const linkDeptcode = dept.deptcode;
-                const linkWorkdate = selectedDate;
-
-                const handleLinkClick = () => {
-                  if (typeof window !== 'undefined') {
-                    localStorage.setItem('prevDashboardDate', selectedDate);
-                  }
-                };
-
-                return (
-                  <tr key={dept.deptcode} className="border-b border-gray-100 last:border-b-0">
-                    <td className={`py-2 px-6 ${getPaddingClass(dept.level)}`}>{dept.deptname}</td>
-                    {scanStatus !== 'not_scanned' && (<td className="py-2 px-6 text-right">{dept.totalScanned}</td>)}
-                    {scanStatus !== 'scanned' && (<td className="py-2 px-6 text-right">{dept.totalNotScanned}</td>)}
-                    <td className="py-2 px-6 text-right">{dept.totalPerson}</td>
-                    <td className="p-3">
-                      <Link href={`/report/${linkDeptcode}?workdate=${linkWorkdate}`} onClick={handleLinkClick}>
-                        <PiFileMagnifyingGlassBold size={30} className="text-blue-500 hover:text-blue-700" />
-                      </Link>
-                    </td>
-                  </tr>
-                );
-              })}
-              {/* Example summary row */}
-              {departmentsToDisplay.length > 0 && departmentsToDisplay.some(dept => dept.deptname && typeof dept.deptname === 'string' && dept.deptname.startsWith('President')) && (
-                <tr className="border-b border-gray-100 font-semibold bg-gray-50">
-                  <td className="py-2 px-6 pl-8">Total for President & P&O:</td>
-                  <td className="py-2 px-6 text-right">{/* Placeholder for actual calculated sum */}</td>
-                  <td className="py-2 px-6 text-right">{/* Placeholder for actual calculated sum */}</td>
-                  <td className="py-2 px-6 text-right">{/* Placeholder for actual calculated sum */}</td>
-                  <td className="p-3"></td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-
-          {limit < filteredDepartments.length && (
-            <div ref={observerTarget} className="flex justify-center mt-4 p-2 text-gray-500">
-              กำลังโหลด...
-            </div>
-          )}
-          {limit >= filteredDepartments.length && filteredDepartments.length > INITIAL_LOAD_LIMIT && (
-            <div className="text-center py-2 text-gray-500">
-              แสดงข้อมูลครบถ้วนแล้ว
-            </div>
-          )}
-        </>
-      )}
+            );
+          })}
+        </tbody>
+      </table>
     </div>
   );
 }

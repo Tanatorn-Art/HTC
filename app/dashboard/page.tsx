@@ -91,7 +91,8 @@ export default function DashboardPage() {
 
       <section className="space-y-4">
         <h1 className="text-xl font-semibold">Manpower Monitoring</h1>
-      
+        
+        {/* Dropdown สำหรับเลือกโรงงาน */}
         <div className="mb-4">
           <label htmlFor="factorySelect" className="block text-gray-700 font-medium mb-2">เลือกโรงงาน:</label>
           <select
@@ -111,6 +112,7 @@ export default function DashboardPage() {
         <ManpowerTable 
           selectedDate={selectedDate} 
           scanStatus="" 
+          deptcodelevel1Filter={selectedFactory === 'all' ? undefined : selectedFactory} 
         />
       </section>
     </div>
