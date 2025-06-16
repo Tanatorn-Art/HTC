@@ -19,7 +19,7 @@ const AttendanceCardSummary = ({ totalScanned, totalNotScanned }: Props) => {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 items-stretch"> 
-
+        {/* ปุ่มสำหรับ "Total" */}
         <button
           onClick={() => handleRedirect('scanned')} 
           className="flex items-center justify-center bg-blue-100 hover:bg-blue-200 text-blue-800 px-6 py-5 rounded-2xl shadow-md transition-transform duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg h-full"
@@ -33,6 +33,7 @@ const AttendanceCardSummary = ({ totalScanned, totalNotScanned }: Props) => {
           </div>
         </button>
 
+        {/* ปุ่มสำหรับ "สแกนแล้ว" */}
         <button
           onClick={() => handleRedirect('scanned')} 
           className="flex items-center justify-center bg-green-100 hover:bg-green-200 text-green-800 px-6 py-5 rounded-2xl shadow-md transition-transform duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg h-full"
@@ -46,6 +47,7 @@ const AttendanceCardSummary = ({ totalScanned, totalNotScanned }: Props) => {
           </div>
         </button>
 
+        {/* ปุ่มสำหรับ "ยังไม่สแกน" */}
         <button
           onClick={() => handleRedirect('not_scanned')} 
           className="flex items-center justify-center bg-red-100 hover:bg-red-200 text-red-800 px-6 py-5 rounded-2xl shadow-md transition-transform duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg h-full"

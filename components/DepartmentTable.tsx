@@ -6,7 +6,7 @@ import { Employee } from '../app/types';
 
 export type DepartmentTableProps = {
   employees: Employee[];
-  scanStatus?: string; 
+  scanStatus?: string; // Optional
 };
 
 export function DepartmentTable({ employees, scanStatus = 'all' }: DepartmentTableProps) {

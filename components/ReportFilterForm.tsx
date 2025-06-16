@@ -76,6 +76,7 @@ const ReportFilterForm = ({ onSearch, initialFilters }: Props) => {
   return (
     <form onSubmit={handleSubmit} className="space-y-4 bg-white p-4 rounded-xl shadow">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* ช่องเลือกวันที่ */}
         <div>
           <label htmlFor="date-input" className="block mb-1 font-medium text-gray-700">วันที่</label>
           <input

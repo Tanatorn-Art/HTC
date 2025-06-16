@@ -6,29 +6,9 @@ import { PiFileMagnifyingGlassBold } from 'react-icons/pi';
 // Import HierarchicalDepartment type from your types file
 import { HierarchicalDepartment as RawDepartmentData } from '@/app/types'; // <--- IMPORT HERE
 
-<<<<<<< HEAD
 // Changed Employee type to reflect the actual API response type HierarchicalDepartment
 // We use a different name "RawDepartmentData" for clarity to distinguish it from the aggregated type
 export type Employee = RawDepartmentData; 
-=======
-export type Employee = {
-  deptcode: string;
-  deptname: string;
-  deptsbu: string;
-  deptstd: string;
-  countscan: string; 
-  countnotscan: string; 
-  countperson: string; 
-  workdate: string;
-  deptcodelevel1: string; 
-  deptcodelevel2: string;
-  deptcodelevel3: string;
-  deptcodelevel4: string;
-  parentcode: string | null;
-  PersonType: string | null;
-  PersonGroup: string | null;
-};
->>>>>>> 2deda7007c2b3a30ca770efb1149214442633db6
 
 type ManpowerTableProps = {
   selectedDate: string;
@@ -203,7 +183,6 @@ export function ManpowerTable({ selectedDate, scanStatus }: ManpowerTableProps) 
 
   return (
     <div className="overflow-x-auto bg-white rounded-xl shadow p-4">
-<<<<<<< HEAD
       {filteredDepartments.length === 0 ? (
         <div className="text-center py-4 text-gray-500">
           ไม่พบข้อมูลสำหรับวันที่หรือเงื่อนไขการสแกนที่เลือก
@@ -218,56 +197,6 @@ export function ManpowerTable({ selectedDate, scanStatus }: ManpowerTableProps) 
                 {scanStatus !== 'scanned' && (<th className="py-2 px-6 text-right">NOT SCANNED IN</th>)}
                 <th className="py-2 px-6 text-right">TOTAL EMPLOYEES</th>
                 <th className="p-0">ดูรายละเอียด</th>
-=======
-      <table className="min-w-full text-sm text-left border-collapse">
-        <thead className="border-b text-gray-600">
-          <tr>
-            <th className="py-2 px-6">รหัสแผนก</th>
-            <th className="py-2 px-6">ชื่อแผนก</th>
-            <th className="py-2 px-6">SBU</th>
-            <th className="py-2 px-6">STD</th>
-            {scanStatus !== 'not_scanned' && (
-                <th className="py-2 px-6">สแกนแล้ว</th>
-            )}
-            {scanStatus !== 'scanned' && (
-                <th className="py-2 px-6">ยังไม่สแกน</th>
-            )}
-            <th className="py-2 px-6">พนักงานทั้งหมด</th>
-            <th className="p-0">ดูรายละเอียด</th> 
-          </tr>
-        </thead>
-        <tbody>
-          {filteredDepartments.map((dept) => { 
-            const linkDeptcode = dept.deptcode;
-            const linkWorkdate = selectedDate; 
-
-            // *** เพิ่มฟังก์ชันนี้เพื่อบันทึก selectedDate ลง localStorage ก่อนคลิกลิงก์ ***
-            const handleLinkClick = () => {
-              if (typeof window !== 'undefined') { 
-                localStorage.setItem('prevDashboardDate', selectedDate);
-    
-              }
-            };
-
-            return (
-              <tr key={dept.deptcode} className="border-b border-gray-100 last:border-b-0">
-                <td className="py-2 px-6">{dept.deptcode}</td>
-                <td className="py-2 px-6">{dept.deptname}</td>
-                <td className="py-2 px-5">{dept.deptsbu}</td>
-                <td className="py-2 px-6">{dept.deptstd}</td>
-                {scanStatus !== 'not_scanned' && (
-                  <td className="py-2 px-6">{dept.totalScanned}</td>
-                )}
-                {scanStatus !== 'scanned' && (
-                  <td className="py-2 px-6">{dept.totalNotScanned}</td>
-                )}
-                <td className="py-2 px-6">{dept.totalPerson}</td>
-                <td className="p-3">
-                  <Link href={`/report/${linkDeptcode}?workdate=${linkWorkdate}`} onClick={handleLinkClick}>
-                    <PiFileMagnifyingGlassBold size={30} className="text-blue-500 hover:text-blue-700" />
-                  </Link>
-                </td>
->>>>>>> 2deda7007c2b3a30ca770efb1149214442633db6
               </tr>
             </thead>
             <tbody>

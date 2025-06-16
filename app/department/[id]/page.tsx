@@ -29,6 +29,7 @@ export default function DepartmentDetailPage() {
 
         const data = await res.json();
 
+        // แปลง raw data เป็น Employee type
         const employees: Employee[] = (data.employees as ReportApiRawData[]).map((emp) => ({
           employeeId: emp.employeeId ?? '',
           groupid: emp.groupid ?? '',
