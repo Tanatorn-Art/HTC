@@ -11,24 +11,22 @@ export type DepartmentTableProps = {
 
 export function DepartmentTable({ employees, scanStatus = 'all' }: DepartmentTableProps) {
   return (
-    // เพิ่มเงาและความโค้งมนที่กรอบใหญ่
-    <div className="overflow-x-auto bg-white rounded-2xl shadow-xl p-6"> {/* ปรับ shadow-lg เป็น shadow-xl และเพิ่ม p-6 */}
+    <div className="overflow-x-auto bg-white rounded-xl shadow p-4">
       <table className="min-w-full text-sm text-left border-collapse">
-        {/* Header ของตาราง: ใช้สีเทาอ่อน พื้นหลังโปร่ง โค้งมนด้านบน */}
-        <thead className="bg-gray-50 text-gray-700 uppercase tracking-wider rounded-t-lg"> {/* เพิ่ม rounded-t-lg */}
+        <thead className="border-b text-gray-600">
           <tr>
-            <th className="py-3 px-6 font-semibold">Work Date</th>
-            <th className="py-3 px-6 font-semibold">Dept. Code</th>
-            <th className="py-3 px-6 font-semibold">Dept. Name</th>
-            <th className="py-3 px-6 font-semibold">SBU</th>
-            <th className="py-3 px-6 font-semibold">STD</th>
+            <th className="py-2 px-6">Work Date</th>
+            <th className="py-2 px-6">Dept. Code</th>
+            <th className="py-2 px-6">Dept. Name</th>
+            <th className="py-2 px-6">SBU</th>
+            <th className="py-2 px-6">STD</th>
             {scanStatus !== 'not_scanned' && (
-              <th className="py-3 px-6 font-semibold">Scan</th>
+              <th className="py-2 px-6">Scan</th>
             )}
             {scanStatus !== 'scanned' && (
-              <th className="py-3 px-6 font-semibold">No Scan</th>
+              <th className="py-2 px-6">No Scan</th>
             )}
-            <th className="py-3 px-6 font-semibold">Person</th>
+            <th className="py-2 px-6">Person</th>
             <th className="p-0"></th>
           </tr>
         </thead>
@@ -40,26 +38,21 @@ export function DepartmentTable({ employees, scanStatus = 'all' }: DepartmentTab
             return (
               <tr
                 key={`${safeDeptCode}-${safeWorkDate}-${index}`}
-                // เพิ่มสีพื้นหลังสลับกัน และเพิ่มเส้นขอบล่างที่ดูบางเบา
-                className={`
-                  ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} 
-                  ${index === employees.length -1 ? '' : 'border-b border-gray-100'} 
-                  hover:bg-gray-100 transition-colors duration-150
-                `}
+                className="border-b border-gray-100 last:border-b-0"
               >
-                <td className="py-3 px-6 text-gray-800">{emp.workdate}</td> {/* เพิ่ม py-3 */}
-                <td className="py-3 px-6 text-gray-800">{emp.deptcode}</td>
-                <td className="py-3 px-5 text-gray-800">{emp.deptname}</td>
-                <td className="py-3 px-6 text-gray-800">{emp.deptsbu}</td>
-                <td className="py-3 px-6 text-gray-800">{emp.deptstd}</td>
+                <td className="py-2 px-6">{emp.workdate}</td>
+                <td className="py-2 px-6">{emp.deptcode}</td>
+                <td className="py-2 px-5">{emp.deptname}</td>
+                <td className="py-2 px-6">{emp.deptsbu}</td>
+                <td className="py-2 px-6">{emp.deptstd}</td>
 
                 {scanStatus !== 'not_scanned' && (
-                  <td className="py-3 px-6 text-gray-800">{emp.countscan}</td>
+                  <td className="py-2 px-6">{emp.countscan}</td>
                 )}
                 {scanStatus !== 'scanned' && (
-                  <td className="py-3 px-6 text-gray-800">{emp.countnotscan}</td>
+                  <td className="py-2 px-6">{emp.countnotscan}</td>
                 )}
-                <td className="py-3 px-6 text-gray-800">{emp.countperson}</td>
+                <td className="py-2 px-6">{emp.countperson}</td>
                 <td className="p-3">
                   {emp.deptcode && emp.workdate ? (
                     <Link
@@ -68,7 +61,7 @@ export function DepartmentTable({ employees, scanStatus = 'all' }: DepartmentTab
                     >
                       <PiFileMagnifyingGlassBold
                         size={30}
-                        className="text-blue-500 hover:text-blue-700 transition-colors duration-200"
+                        className="text-blue-500 hover:text-blue-700"
                         title="ดูรายละเอียด"
                       />
                     </Link>

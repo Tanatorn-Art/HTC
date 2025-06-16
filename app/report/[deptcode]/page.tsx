@@ -23,7 +23,7 @@ export default function ReportDetailPage() {
   const [details, setDetails] = useState<Detail[]>([]);
   const [deptName, setDeptName] = useState('');
   const [loading, setLoading] = useState(false);
-  // const [currentPage, setCurrentPage] = useState(1); // This line is likely the other unused variable error if it exists
+  const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10); 
 
   const isValidDate = (dateStr: string) =>
@@ -87,8 +87,8 @@ export default function ReportDetailPage() {
       }
       // ถ้าเป็น Date object ที่ถูกต้อง ให้ format เป็น HH:MM:SS
       return date.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
-    } catch (_e) { // Changed 'e' to '_e' here
-      console.error("Error formatting time:", isoString, _e);
+    } catch (e) {
+      console.error("Error formatting time:", isoString, e);
       return isoString.substring(0, 8) || '-'; // Fallback ในกรณีเกิดข้อผิดพลาด
     }
   };
@@ -109,7 +109,7 @@ export default function ReportDetailPage() {
 
     const csvContent =
       'data:text/csv;charset=utf-8,' +
-      [headers, ...rows].map((_e) => _e.join(',')).join('\n'); // Changed 'e' to '_e' here
+      [headers, ...rows].map((e) => e.join(',')).join('\n');
 
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
@@ -133,7 +133,7 @@ export default function ReportDetailPage() {
             timePart = time.substring(0,8); 
             if (timePart.length < 8) timePart += ':00'; // เพิ่มวินาทีถ้าไม่มี (HH:MM -> HH:MM:00)
         }
-    } catch (_e) { // Changed 'e' to '_e' here
+    } catch (e) {
         timePart = time.substring(0,8); 
         if (timePart.length < 8) timePart += ':00';
     }
@@ -166,8 +166,8 @@ export default function ReportDetailPage() {
   const paginatedNotScanned = notScannedDetails.slice(0, rowsPerPage);
   const paginatedScanned = scannedDetails.slice(0, rowsPerPage);
 
-  const handleRowsPerPageChange = (_e: React.ChangeEvent<HTMLSelectElement>) => { // Changed 'e' to '_e' here
-    setRowsPerPage(Number(_e.target.value));
+  const handleRowsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setRowsPerPage(Number(e.target.value));
   };
 
   return (

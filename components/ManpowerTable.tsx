@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { PiFileMagnifyingGlassBold } from 'react-icons/pi';
-import Spinner from './ui/Spinner'; // ตรวจสอบเส้นทางว่าถูกต้องหรือไม่
+import Spinner from './ui/Spinner'; 
 
 // ตรวจสอบให้แน่ใจว่า Employee Type ในไฟล์นี้ตรงกับโครงสร้างข้อมูลที่ API ส่งมา
 export type Employee = {
@@ -11,11 +11,11 @@ export type Employee = {
   deptname: string;
   deptsbu: string;
   deptstd: string;
-  countscan: string; // อาจเป็น string จาก API
-  countnotscan: string; // อาจเป็น string จาก API
-  countperson: string; // อาจเป็น string จาก API
+  countscan: string; 
+  countnotscan: string; 
+  countperson: string; 
   workdate: string;
-  deptcodelevel1: string;
+  deptcodelevel1: string; 
   deptcodelevel2: string;
   deptcodelevel3: string;
   deptcodelevel4: string;
@@ -27,7 +27,7 @@ export type Employee = {
 type ManpowerTableProps = {
   selectedDate: string;
   scanStatus: string;
-  deptcodelevel1Filter?: string;
+  deptcodelevel1Filter?: string; 
 };
 
 type AggregatedDepartment = {
@@ -74,9 +74,8 @@ export function ManpowerTable({ selectedDate, scanStatus, deptcodelevel1Filter }
     const departmentMap = new Map<string, AggregatedDepartment>();
 
     employees.forEach(emp => {
-      // กรองตาม deptcodelevel1Filter ถ้ามี
       if (deptcodelevel1Filter && emp.deptcodelevel1 !== deptcodelevel1Filter) {
-        return;
+        return; 
       }
 
       let currentDept = departmentMap.get(emp.deptcode);
@@ -93,14 +92,13 @@ export function ManpowerTable({ selectedDate, scanStatus, deptcodelevel1Filter }
         departmentMap.set(emp.deptcode, currentDept);
       }
 
-      // แปลงค่า string เป็น number ก่อนบวก
-      currentDept.totalScanned += Number(emp.countscan || '0');
-      currentDept.totalNotScanned += Number(emp.countnotscan || '0');
-      currentDept.totalPerson += Number(emp.countperson || '0');
+      currentDept.totalScanned += Number(emp.countscan);
+      currentDept.totalNotScanned += Number(emp.countnotscan);
+      currentDept.totalPerson += Number(emp.countperson);
     });
 
     return Array.from(departmentMap.values());
-  }, [employees, deptcodelevel1Filter]);
+  }, [employees, deptcodelevel1Filter]); 
 
   const filteredDepartments = useMemo(() => {
     if (scanStatus === 'scanned') {
@@ -112,96 +110,76 @@ export function ManpowerTable({ selectedDate, scanStatus, deptcodelevel1Filter }
     return aggregatedDepartments;
   }, [aggregatedDepartments, scanStatus]);
 
-  // --- UI สำหรับ Loading, Error, No Data ---
+
   if (loading) {
     return (
-      <div className="flex justify-center items-center p-8">
+      <div className="flex justify-center items-center p-4">
         <Spinner />
-        <span className="ml-2 text-gray-600">กำลังโหลดข้อมูล...</span>
       </div>
     );
   }
 
   if (error) {
-    return (
-      <div className="text-center text-red-500 bg-red-100 p-4 rounded-lg shadow-sm m-4">
-        <p className="font-semibold">เกิดข้อผิดพลาดในการดึงข้อมูล</p>
-        <p className="text-sm">{error}</p>
-      </div>
-    );
+    return <div className="text-red-500">Error: {error}</div>;
   }
 
   if (filteredDepartments.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-500 bg-white rounded-xl shadow-md m-4">
-        <p className="text-lg">ไม่พบข้อมูลสำหรับวันที่เลือก หรือตัวกรองที่ระบุ</p>
-        <p className="text-sm mt-2">โปรดลองเลือกวันที่อื่น หรือปรับตัวกรอง</p>
+      <div className="text-center py-4 text-gray-500">
+        ไม่พบข้อมูลสำหรับโรงงานนี้
       </div>
     );
   }
 
   return (
-    // ปรับปรุง div หลักให้มีเงาและกรอบโค้งมนตามสไตล์ Google
-    <div className="overflow-x-auto bg-white rounded-2xl shadow-xl p-6">
+    <div className="overflow-x-auto bg-white rounded-xl shadow p-4">
       <table className="min-w-full text-sm text-left border-collapse">
-        {/* Header ของตาราง: สีเทาอ่อน, ตัวอักษรหนา, โค้งมนด้านบน */}
-        <thead className="bg-gray-50 text-gray-700 tracking-wider rounded-t-lg">
+        <thead className="border-b text-gray-600">
           <tr>
-            <th className="py-3 px-6">Deptcode</th>
-            <th className="py-3 px-6">Deptname</th>
-            <th className="py-3 px-6">SBU</th>
-            <th className="py-3 px-6">STD</th>
+            <th className="py-2 px-6">รหัสแผนก</th>
+            <th className="py-2 px-6">ชื่อแผนก</th>
+            <th className="py-2 px-6">SBU</th>
+            <th className="py-2 px-6">STD</th>
             {scanStatus !== 'not_scanned' && (
-              <th className="py-3 px-6">Scan</th>
+                <th className="py-2 px-6">สแกนแล้ว</th>
             )}
             {scanStatus !== 'scanned' && (
-              <th className="py-3 px-6 ">No scan</th>
+                <th className="py-2 px-6">ยังไม่สแกน</th>
             )}
-            <th className="py-3 px-6">Person</th>
-            <th className="p-3 ">Detail</th>
+            <th className="py-2 px-6">พนักงานทั้งหมด</th>
+            <th className="p-0">ดูรายละเอียด</th> 
           </tr>
         </thead>
         <tbody>
-          {filteredDepartments.map((dept, index) => {
+          {filteredDepartments.map((dept) => { 
             const linkDeptcode = dept.deptcode;
-            const linkWorkdate = selectedDate;
+            const linkWorkdate = selectedDate; 
 
-            // ฟังก์ชันสำหรับบันทึก selectedDate ลง localStorage ก่อนคลิกลิงก์
+            // *** เพิ่มฟังก์ชันนี้เพื่อบันทึก selectedDate ลง localStorage ก่อนคลิกลิงก์ ***
             const handleLinkClick = () => {
-              if (typeof window !== 'undefined') {
+              if (typeof window !== 'undefined') { // ตรวจสอบว่าโค้ดรันบน Browser
                 localStorage.setItem('prevDashboardDate', selectedDate);
+    
               }
             };
 
             return (
-              <tr
-                key={dept.deptcode} // Key ควรเป็นค่าที่ unique เช่น deptcode
-                // เพิ่มสีพื้นหลังสลับกัน และเพิ่มเส้นขอบล่างที่ดูบางเบา
-                className={`
-                  ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}
-                  ${index === filteredDepartments.length - 1 ? '' : 'border-b border-gray-100'}
-                  hover:bg-gray-100 transition-colors duration-150
-                `}
-              >
-                <td className="py-3 px-6 text-gray-800">{dept.deptcode}</td>
-                <td className="py-3 px-6 text-gray-800">{dept.deptname}</td>
-                <td className="py-3 px-5 text-gray-800">{dept.deptsbu}</td>
-                <td className="py-3 px-6 text-gray-800">{dept.deptstd}</td>
+              <tr key={dept.deptcode} className="border-b border-gray-100 last:border-b-0">
+                <td className="py-2 px-6">{dept.deptcode}</td>
+                <td className="py-2 px-6">{dept.deptname}</td>
+                <td className="py-2 px-5">{dept.deptsbu}</td>
+                <td className="py-2 px-6">{dept.deptstd}</td>
                 {scanStatus !== 'not_scanned' && (
-                  <td className="py-3 px-6 text-gray-800">{dept.totalScanned}</td>
+                  <td className="py-2 px-6">{dept.totalScanned}</td>
                 )}
                 {scanStatus !== 'scanned' && (
-                  <td className="py-3 px-6 text-gray-800">{dept.totalNotScanned}</td>
+                  <td className="py-2 px-6">{dept.totalNotScanned}</td>
                 )}
-                <td className="py-3 px-6 text-gray-800">{dept.totalPerson}</td>
+                <td className="py-2 px-6">{dept.totalPerson}</td>
                 <td className="p-3">
-                  <Link
-                    href={`/report/${encodeURIComponent(linkDeptcode)}?workdate=${encodeURIComponent(linkWorkdate)}`}
-                    onClick={handleLinkClick}
-                    className="flex items-center justify-center" // จัดไอคอนให้อยู่ตรงกลาง
-                    title="ดูรายละเอียดการสแกนของแผนกนี้"
-                  >
-                    <PiFileMagnifyingGlassBold size={24} className="text-blue-600 hover:text-blue-800 transition-colors duration-200" />
+                  {/* *** เพิ่ม onClick event ที่เรียก handleLinkClick *** */}
+                  <Link href={`/report/${linkDeptcode}?workdate=${linkWorkdate}`} onClick={handleLinkClick}>
+                    <PiFileMagnifyingGlassBold size={30} className="text-blue-500 hover:text-blue-700" />
                   </Link>
                 </td>
               </tr>
