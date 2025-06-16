@@ -23,8 +23,7 @@ export default function ReportDetailPage() {
   const [details, setDetails] = useState<Detail[]>([]);
   const [deptName, setDeptName] = useState('');
   const [loading, setLoading] = useState(false);
-  // const [currentPage, setCurrentPage] = useState(1); // This line is likely the other unused variable error if it exists
-  const [rowsPerPage, setRowsPerPage] = useState(10); 
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const isValidDate = (dateStr: string) =>
     /^\d{4}-\d{2}-\d{2}$/.test(dateStr) && !isNaN(new Date(dateStr).getTime());
@@ -63,8 +62,8 @@ export default function ReportDetailPage() {
         const data = await res.json();
         setDetails(data.detil || []);
         setDeptName(data.deptname || 'ไม่พบชื่อแผนก');
-      } catch (err) {
-        console.error('เกิดข้อผิดพลาด:', err);
+      } catch {
+        console.error('เกิดข้อผิดพลาด');
         setDetails([]);
         setDeptName('เกิดข้อผิดพลาด');
       } finally {
@@ -75,21 +74,22 @@ export default function ReportDetailPage() {
     fetchDetails();
   }, [deptcode, from, to, initialWorkdate]);
 
-  // --- ปรับปรุงฟังก์ชัน formatTime ให้แสดงวินาที ---
   const formatTime = (isoString: string | null): string => {
     if (!isoString) return '-';
     try {
       const date = new Date(isoString);
       if (isNaN(date.getTime())) {
-        // Fallback ถ้าเป็น String ที่ไม่สามารถ parse เป็น Date ได้ (เช่น "HH:MM:SS")
-        // พยายามดึงส่วนเวลาออกมา 8 ตัว (HH:MM:SS)
-        return isoString.substring(0, 8); 
+        return isoString.substring(0, 8);
       }
-      // ถ้าเป็น Date object ที่ถูกต้อง ให้ format เป็น HH:MM:SS
-      return date.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
-    } catch (_e) { // Changed 'e' to '_e' here
-      console.error("Error formatting time:", isoString, _e);
-      return isoString.substring(0, 8) || '-'; // Fallback ในกรณีเกิดข้อผิดพลาด
+      return date.toLocaleTimeString('th-TH', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false,
+      });
+    } catch {
+      console.error('Error formatting time:', isoString);
+      return isoString.substring(0, 8) || '-';
     }
   };
 
@@ -99,17 +99,17 @@ export default function ReportDetailPage() {
       return;
     }
 
-    const headers = ['ชื่อ-สกุล', 'เวลาเข้า', 'เวลาออก', 'over-in'];
+    const headers = ['ชื่อ-สกุล', 'เวลาเข้า', 'เวลาออก', 'เข้างานสาย'];
     const rows = details.map((d) => [
       d.full_name,
-      formatTime(d.firstscantime), // ใช้ formatTime สำหรับ CSV
-      formatTime(d.lastscantime),  // ใช้ formatTime สำหรับ CSV
+      formatTime(d.firstscantime),
+      formatTime(d.lastscantime),
       getOverIn(d.firstscantime) || '-',
     ]);
 
     const csvContent =
       'data:text/csv;charset=utf-8,' +
-      [headers, ...rows].map((_e) => _e.join(',')).join('\n'); // Changed 'e' to '_e' here
+      [headers, ...rows].map((e) => e.join(',')).join('\n');
 
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
@@ -120,31 +120,33 @@ export default function ReportDetailPage() {
     document.body.removeChild(link);
   };
 
-  // --- ปรับปรุงฟังก์ชัน getOverIn เพื่อให้ถูกต้องเมื่อมีวินาที ---
   const getOverIn = (time: string | null) => {
     if (!time) return null;
-    
+
     let timePart = '';
     try {
-        const dateObj = new Date(time);
-        if (!isNaN(dateObj.getTime())) { // ถ้าเป็น ISO string ที่ถูกต้อง
-            timePart = dateObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
-        } else { // อาจจะเป็นแค่ "HH:MM:SS" หรือ "HH:MM"
-            timePart = time.substring(0,8); 
-            if (timePart.length < 8) timePart += ':00'; // เพิ่มวินาทีถ้าไม่มี (HH:MM -> HH:MM:00)
-        }
-    } catch (_e) { // Changed 'e' to '_e' here
-        timePart = time.substring(0,8); 
+      const dateObj = new Date(time);
+      if (!isNaN(dateObj.getTime())) {
+        timePart = dateObj.toLocaleTimeString('en-US', {
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: false,
+        });
+      } else {
+        timePart = time.substring(0, 8);
         if (timePart.length < 8) timePart += ':00';
+      }
+    } catch {
+      timePart = time.substring(0, 8);
+      if (timePart.length < 8) timePart += ':00';
     }
-    
-    // สร้าง Date objects สำหรับเปรียบเทียบ โดยใช้ Base Date เดียวกัน
+
     const overTime = new Date(`1970-01-01T${timePart}`);
-    const threshold = new Date('1970-01-01T08:00:00'); // เวลา 08:00:00
-    
-    // เปรียบเทียบเวลาทั้งหมด (ชั่วโมง, นาที, วินาที)
-    if (overTime.getTime() > threshold.getTime()) { // ใช้ getTime() เพื่อเปรียบเทียบ milliseconds
-      return formatTime(time); // แสดงเวลาที่เข้างานสายด้วยวินาที
+    const threshold = new Date('1970-01-01T08:00:00');
+
+    if (overTime.getTime() > threshold.getTime()) {
+      return formatTime(time);
     } else {
       return '-';
     }
@@ -154,7 +156,11 @@ export default function ReportDetailPage() {
   const invalidWorkdate = !initialWorkdate || !isValidDate(initialWorkdate);
 
   if (invalidDept) {
-    return <div className="p-6 text-red-600">รหัสแผนกไม่ถูกต้อง หรือไม่พบข้อมูลสำหรับแผนกนี้</div>;
+    return (
+      <div className="p-6 text-red-600">
+        รหัสแผนกไม่ถูกต้อง หรือไม่พบข้อมูลสำหรับแผนกนี้
+      </div>
+    );
   }
   if (invalidWorkdate) {
     return <div className="p-6 text-red-600">รูปแบบวันที่ไม่ถูกต้อง</div>;
@@ -166,8 +172,8 @@ export default function ReportDetailPage() {
   const paginatedNotScanned = notScannedDetails.slice(0, rowsPerPage);
   const paginatedScanned = scannedDetails.slice(0, rowsPerPage);
 
-  const handleRowsPerPageChange = (_e: React.ChangeEvent<HTMLSelectElement>) => { // Changed 'e' to '_e' here
-    setRowsPerPage(Number(_e.target.value));
+  const handleRowsPerPageChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setRowsPerPage(Number(event.target.value));
   };
 
   return (
@@ -269,12 +275,15 @@ export default function ReportDetailPage() {
 
           {details.length > 0 && (
             <div className="flex flex-wrap items-center justify-center gap-4 mt-4">
-              <label htmlFor="rows-per-page-bottom" className="text-sm font-medium text-gray-700">
+              <label
+                htmlFor="rows-per-page-bottom"
+                className="text-sm font-medium text-gray-700"
+              >
                 select row :
               </label>
               <select
                 id="rows-per-page-bottom"
-                value={rowsPerPage} 
+                value={rowsPerPage}
                 onChange={handleRowsPerPageChange}
                 className="border border-slate-300 px-2 py-1 rounded"
               >

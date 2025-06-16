@@ -1,0 +1,1436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organization Structure & Employee Summary</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for indentation and visual hierarchy */
+        .dept-level-0 { /* For the overall main department, like "President" */
+            background-color: #1a476b; /* Deeper blue background */
+            color: #e0f2fe; /* Light blue text */
+            font-weight: 800; /* Extra bold */
+            font-size: 1.625rem; /* text-3xl for stronger visual impact */
+            padding: 1rem 1.5rem; /* More padding */
+            border-bottom: 3px solid #a7d9f7;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2); /* Slight text shadow */
+        }
+        .dept-level-1 { /* For the direct children of main department, e.g., "President -> P&O" */
+            background-color: #e0f2fe; /* light blue */
+            color: #1a476b; /* dark blue text */
+            font-weight: 700; /* bold */
+            font-size: 1.25rem; /* text-xl */
+            padding-left: 2.5rem; /* Increased indent */
+            border-bottom: 1px solid #bfdbfe;
+        }
+        .dept-level-2 { /* For the next level, e.g., "President -> P&O -> IT" */
+            background-color: #f0f9ff; /* even lighter blue */
+            color: #1d4ed8; /* medium blue text */
+            font-weight: 600; /* semi-bold */
+            font-size: 1.05rem; /* Slightly larger than base */
+            padding-left: 3.5rem; /* Increased indent */
+            border-bottom: 1px dotted #dbeafe;
+        }
+        .dept-level-3 { /* For the next level, e.g., "RF EMC -> RF PD LineA -> LineA Leader -> Roll former A" */
+            background-color: #f8fafc; /* lightest gray-blue */
+            color: #374151; /* gray text */
+            font-weight: 500; /* medium */
+            padding-left: 4.5rem; /* Further increased indent */
+            border-bottom: 1px dotted #e2e8f0;
+        }
+        .dept-level-4 { /* For the deepest level */
+            background-color: #ffffff; /* white */
+            color: #4b5563; /* slightly darker gray text */
+            font-weight: 400; /* normal */
+            padding-left: 5.5rem; /* Further increased indent */
+            border-bottom: 1px dotted #f3f4f6;
+        }
+        .total-row { /* Style for grand total */
+            background-color: #2f3e46; /* Darker gray for grand total */
+            color: #f9fafb; /* White text */
+            font-weight: 700; /* Bold */
+            font-size: 1.5rem; /* text-2xl */
+            border-top: 4px solid #60a5fa; /* Thicker blue border top */
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3); /* Slight text shadow */
+        }
+        .section-total { /* Total for each main department block */
+            background-color: #93c5fd; /* Medium blue */
+            color: #1e40af; /* Dark blue text */
+            font-weight: 700;
+            font-size: 1.125rem; /* text-lg */
+            border-top: 2px solid #60a5fa;
+            border-bottom: 2px solid #60a5fa;
+        }
+        .sub-section-total { /* Total for a major sub-department block (e.g., total for P&O) */
+            background-color: #dbeafe; /* Lighter blue */
+            color: #2563eb; /* Blue text */
+            font-weight: 600;
+            border-top: 1px dashed #93c5fd;
+            border-bottom: 1px solid #c3d9fd;
+        }
+        .data-cell {
+            text-align: center;
+            padding: 0.75rem 1.5rem; /* py-3 px-6 for more vertical space */
+        }
+        .scanned-in { color: #16a34a; /* green-600 */ }
+        .not-scanned-in { color: #dc2626; /* red-600 */ }
+        .total-employees { color: #1e40af; /* blue-800 */ }
+
+        /* General table styling */
+        table {
+            border-collapse: collapse; /* Ensure no double borders */
+        }
+        th, td {
+            padding: 0.75rem 1.5rem; /* Consistent padding */
+            border-right: 1px solid #e2e8f0; /* Light vertical borders */
+        }
+        th:last-child, td:last-child {
+            border-right: none; /* No border on the last column */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans antialiased text-gray-800">
+
+    <div class="container mx-auto p-4 md:p-8 mt-10">
+        <h1 class="text-4xl font-extrabold mb-8 text-gray-900 text-center">Organizational Structure & Employee Summary</h1>
+
+        <div class="overflow-x-auto shadow-2xl rounded-lg border border-gray-200">
+            <table class="w-full text-base text-left text-gray-700">
+                <thead class="text-sm text-gray-700 uppercase bg-gray-100">
+                    <tr>
+                        <th scope="col" class="px-6 py-3">
+                            Department / Sub-Department
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-center">
+                            Scanned In
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-center">
+                            Not Scanned In
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-center">
+                            Total Employees
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="dept-level-0">
+                        <td colspan="4" class="px-4 py-3">President</td>
+                    </tr>
+                    <tr class="dept-level-1">
+                        <td class="px-6 py-2">President</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees font-bold">1</td>
+                    </tr>
+                    <tr class="dept-level-1">
+                        <td class="px-6 py-2">P&O</td>
+                        <td class="data-cell scanned-in">4</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees font-bold">4</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">P&O</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">IT</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">Legal</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">RICA</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">P.Operation</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">P.Facility</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">P.Energy</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">P.EHS</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="sub-section-total">
+                        <td class="px-6 py-2 text-right">Total for President & P&O:</td>
+                        <td class="data-cell scanned-in">9</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">9</td>
+                    </tr>
+                    <tr class="dept-level-1">
+                        <td class="px-6 py-2">HR</td>
+                        <td class="data-cell scanned-in">3</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees font-bold">3</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">HR</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">HR PF</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">HRBP RF</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">HRBP AC</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="sub-section-total">
+                        <td class="px-6 py-2 text-right">Total for HR:</td>
+                        <td class="data-cell scanned-in">4</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">4</td>
+                    </tr>
+                    <tr class="dept-level-1">
+                        <td class="px-6 py-2">F & A</td>
+                        <td class="data-cell scanned-in">4</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees font-bold">4</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">F & A</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">RF C & B Mgt.</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">AC C & B Mgt.</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">Platform Head</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">Account& Tax</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">Cash & Credit</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">Financial</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="sub-section-total">
+                        <td class="px-6 py-2 text-right">Total for F & A:</td>
+                        <td class="data-cell scanned-in">7</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">7</td>
+                    </tr>
+                    <tr class="dept-level-1">
+                        <td class="px-6 py-2">SCM</td>
+                        <td class="data-cell scanned-in">5</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees font-bold">5</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">SCM</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">Operation&Admin</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">Vendor Mgt.</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">Indirect</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">Cost Mgt.</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">Sourcing PF</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">RF Import & Export</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">AC Import & Export</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">Privilege Mgt.</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="sub-section-total">
+                        <td class="px-6 py-2 text-right">Total for SCM:</td>
+                        <td class="data-cell scanned-in">9</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">9</td>
+                    </tr>
+                    <tr class="dept-level-1">
+                        <td class="px-6 py-2">EMR</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees font-bold">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">EMR</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="sub-section-total">
+                        <td class="px-6 py-2 text-right">Total for EMR:</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-1">
+                        <td class="px-6 py-2">Logistic Mgt.</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees font-bold">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">Logistic Mgt.</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="sub-section-total">
+                        <td class="px-6 py-2 text-right">Total for Logistic Mgt.:</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="section-total">
+                        <td class="px-6 py-3 text-right text-lg">Total for President:</td>
+                        <td class="data-cell scanned-in text-xl">23</td>
+                        <td class="data-cell not-scanned-in text-xl">0</td>
+                        <td class="data-cell total-employees text-xl">23</td>
+                    </tr>
+
+                    <tr class="dept-level-0">
+                        <td colspan="4" class="px-4 py-3">AC EMC</td>
+                    </tr>
+                    <tr class="dept-level-1">
+                        <td class="px-6 py-2">AC Marketing</td>
+                        <td class="data-cell scanned-in">5</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees font-bold">5</td>
+                    </tr>
+                    <tr class="sub-section-total">
+                        <td class="px-6 py-2 text-right">Total for AC Marketing:</td>
+                        <td class="data-cell scanned-in">5</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">5</td>
+                    </tr>
+                    <tr class="dept-level-1">
+                        <td class="px-6 py-2">AC Sourcing</td>
+                        <td class="data-cell scanned-in">6</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees font-bold">6</td>
+                    </tr>
+                    <tr class="sub-section-total">
+                        <td class="px-6 py-2 text-right">Total for AC Sourcing:</td>
+                        <td class="data-cell scanned-in">6</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">6</td>
+                    </tr>
+                    <tr class="dept-level-1">
+                        <td class="px-6 py-2">AC Operation</td>
+                        <td class="data-cell scanned-in">7</td>
+                        <td class="data-cell not-scanned-in">1</td>
+                        <td class="data-cell total-employees font-bold">8</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">AC GA</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">AC CostROI</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">AC EHS</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="sub-section-total">
+                        <td class="px-6 py-2 text-right">Total for AC Operation:</td>
+                        <td class="data-cell scanned-in">10</td>
+                        <td class="data-cell not-scanned-in">1</td>
+                        <td class="data-cell total-employees">11</td>
+                    </tr>
+                    <tr class="dept-level-1">
+                        <td class="px-6 py-2">AC PD WAC</td>
+                        <td class="data-cell scanned-in">10</td>
+                        <td class="data-cell not-scanned-in">2</td>
+                        <td class="data-cell total-employees font-bold">12</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">AC PD WAC Sup</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">AC Admin WAC</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">Leader PD WAC</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">WAC Line 1</td>
+                        <td class="data-cell scanned-in">5</td>
+                        <td class="data-cell not-scanned-in">1</td>
+                        <td class="data-cell total-employees">6</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">WAC Line 2</td>
+                        <td class="data-cell scanned-in">5</td>
+                        <td class="data-cell not-scanned-in">1</td>
+                        <td class="data-cell total-employees">6</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">AIO</td>
+                        <td class="data-cell scanned-in">2</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">2</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">WAC(PTAC)</td>
+                        <td class="data-cell scanned-in">2</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">2</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">AC WAC 6S</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">WAC Chinese</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="sub-section-total">
+                        <td class="px-6 py-2 text-right">Total for AC PD WAC:</td>
+                        <td class="data-cell scanned-in">29</td>
+                        <td class="data-cell not-scanned-in">2</td>
+                        <td class="data-cell total-employees">31</td>
+                    </tr>
+                    <tr class="dept-level-1">
+                        <td class="px-6 py-2">AC PD SAC</td>
+                        <td class="data-cell scanned-in">10</td>
+                        <td class="data-cell not-scanned-in">1</td>
+                        <td class="data-cell total-employees font-bold">11</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">AC PD SAC Sup</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">AC Admin SAC</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">Leader PD SAC</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">Indoor 1</td>
+                        <td class="data-cell scanned-in">5</td>
+                        <td class="data-cell not-scanned-in">1</td>
+                        <td class="data-cell total-employees">6</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">Indoor 2</td>
+                        <td class="data-cell scanned-in">5</td>
+                        <td class="data-cell not-scanned-in">1</td>
+                        <td class="data-cell total-employees">6</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">Outdoor 1</td>
+                        <td class="data-cell scanned-in">5</td>
+                        <td class="data-cell not-scanned-in">1</td>
+                        <td class="data-cell total-employees">6</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">Outdoor 2</td>
+                        <td class="data-cell scanned-in">5</td>
+                        <td class="data-cell not-scanned-in">1</td>
+                        <td class="data-cell total-employees">6</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">Spare SAC</td>
+                        <td class="data-cell scanned-in">2</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">2</td>
+                    </tr>
+                    <tr class="sub-section-total">
+                        <td class="px-6 py-2 text-right">Total for AC PD SAC:</td>
+                        <td class="data-cell scanned-in">25</td>
+                        <td class="data-cell not-scanned-in">5</td>
+                        <td class="data-cell total-employees">30</td>
+                    </tr>
+                    <tr class="dept-level-1">
+                        <td class="px-6 py-2">AC IH PD</td>
+                        <td class="data-cell scanned-in">8</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees font-bold">8</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">AC IH cost</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">AC IH Leader</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">AC IH E&C Sup</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">AC Machine</td>
+                        <td class="data-cell scanned-in">2</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">2</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">AC Auto line</td>
+                        <td class="data-cell scanned-in">2</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">2</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">AC Helium line</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">AC IH P&P Sup</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">AC Painting</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">AC Piping</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="sub-section-total">
+                        <td class="px-6 py-2 text-right">Total for AC IH PD:</td>
+                        <td class="data-cell scanned-in">11</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">11</td>
+                    </tr>
+                    <tr class="dept-level-1">
+                        <td class="px-6 py-2">AC PS</td>
+                        <td class="data-cell scanned-in">6</td>
+                        <td class="data-cell not-scanned-in">1</td>
+                        <td class="data-cell total-employees font-bold">7</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">AC Planning</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">AC Purchasing</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">AC FG WH</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-3">
+                        <td class="px-6 py-2">AC FG Project</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">AC FG Forklift</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">AC RM WH</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">AC RM Forklift</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">1</td>
+                        <td class="data-cell total-employees">2</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">AC RM VendorVR</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="sub-section-total">
+                        <td class="px-6 py-2 text-right">Total for AC PS:</td>
+                        <td class="data-cell scanned-in">9</td>
+                        <td class="data-cell not-scanned-in">1</td>
+                        <td class="data-cell total-employees">10</td>
+                    </tr>
+                    <tr class="dept-level-1">
+                        <td class="px-6 py-2">AC TS</td>
+                        <td class="data-cell scanned-in">4</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees font-bold">4</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">AC ET</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">AC IE&Tooling</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">AC NPI Mgt.</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">AC IT</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">AC TSOperation</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="sub-section-total">
+                        <td class="px-6 py-2 text-right">Total for AC TS:</td>
+                        <td class="data-cell scanned-in">5</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">5</td>
+                    </tr>
+                    <tr class="dept-level-1">
+                        <td class="px-6 py-2">AC QA</td>
+                        <td class="data-cell scanned-in">5</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees font-bold">5</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">AC Document</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">AC QAOperation</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">AC IQC</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">AC OQC</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">AC QA improve</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">AC Laboratory</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="sub-section-total">
+                        <td class="px-6 py-2 text-right">Total for AC QA:</td>
+                        <td class="data-cell scanned-in">6</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">6</td>
+                    </tr>
+                    <tr class="dept-level-1">
+                        <td class="px-6 py-2">PQC Sup</td>
+                        <td class="data-cell scanned-in">6</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees font-bold">6</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">PQC Leader</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">PQC SAC</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">PQC WAC</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">PQC IH</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">PQC PTAC</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">Barcode</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">Spare PQC</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="sub-section-total">
+                        <td class="px-6 py-2 text-right">Total for PQC Sup:</td>
+                        <td class="data-cell scanned-in">7</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">7</td>
+                    </tr>
+                    <tr class="dept-level-1">
+                        <td class="px-6 py-2">AC R&D</td>
+                        <td class="data-cell scanned-in">3</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees font-bold">3</td>
+                    </tr>
+                    <tr class="sub-section-total">
+                        <td class="px-6 py-2 text-right">Total for AC R&D:</td>
+                        <td class="data-cell scanned-in">3</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">3</td>
+                    </tr>
+                    <tr class="dept-level-1">
+                        <td class="px-6 py-2">AC E&M</td>
+                        <td class="data-cell scanned-in">2</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees font-bold">2</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">AC UT</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">AC Project Mgt</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="sub-section-total">
+                        <td class="px-6 py-2 text-right">Total for AC E&M:</td>
+                        <td class="data-cell scanned-in">2</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">2</td>
+                    </tr>
+                    <tr class="section-total">
+                        <td class="px-6 py-3 text-right text-lg">Total for AC EMC:</td>
+                        <td class="data-cell scanned-in text-xl">103</td>
+                        <td class="data-cell not-scanned-in text-xl">9</td>
+                        <td class="data-cell total-employees text-xl">112</td>
+                    </tr>
+
+                    <tr class="dept-level-0">
+                        <td colspan="4" class="px-4 py-3">RF EMC</td>
+                    </tr>
+                    <tr class="dept-level-1">
+                        <td class="px-6 py-2">RF Operation</td>
+                        <td class="data-cell scanned-in">5</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees font-bold">5</td>
+                    </tr>
+                    <tr class="sub-section-total">
+                        <td class="px-6 py-2 text-right">Total for RF Operation:</td>
+                        <td class="data-cell scanned-in">5</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">5</td>
+                    </tr>
+                    <tr class="dept-level-1">
+                        <td class="px-6 py-2">RF Marketing</td>
+                        <td class="data-cell scanned-in">4</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees font-bold">4</td>
+                    </tr>
+                    <tr class="sub-section-total">
+                        <td class="px-6 py-2 text-right">Total for RF Marketing:</td>
+                        <td class="data-cell scanned-in">4</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">4</td>
+                    </tr>
+                    <tr class="dept-level-1">
+                        <td class="px-6 py-2">RF Sourcing</td>
+                        <td class="data-cell scanned-in">5</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees font-bold">5</td>
+                    </tr>
+                    <tr class="sub-section-total">
+                        <td class="px-6 py-2 text-right">Total for RF Sourcing:</td>
+                        <td class="data-cell scanned-in">5</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">5</td>
+                    </tr>
+                    <tr class="dept-level-1">
+                        <td class="px-6 py-2">RF PD LineA</td>
+                        <td class="data-cell scanned-in">10</td>
+                        <td class="data-cell not-scanned-in">1</td>
+                        <td class="data-cell total-employees font-bold">11</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">Line A Mgr</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">LineA Sup</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">LineA Admin</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">LineA Leader</td>
+                        <td class="data-cell scanned-in">5</td>
+                        <td class="data-cell not-scanned-in">1</td>
+                        <td class="data-cell total-employees">6</td>
+                    </tr>
+                    <tr class="dept-level-3">
+                        <td class="px-6 py-2">Roll former A</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-3">
+                        <td class="px-6 py-2">Inner Box A</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-3">
+                        <td class="px-6 py-2">Cab pre assy A</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-3">
+                        <td class="px-6 py-2">Cab PU Foam A</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-3">
+                        <td class="px-6 py-2">Assembly A</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-3">
+                        <td class="px-6 py-2">System ass'y A</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-3">
+                        <td class="px-6 py-2">Vacuum A</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-3">
+                        <td class="px-6 py-2">Final&Pack A</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="sub-section-total">
+                        <td class="px-6 py-2 text-right">Total for RF PD LineA:</td>
+                        <td class="data-cell scanned-in">14</td>
+                        <td class="data-cell not-scanned-in">1</td>
+                        <td class="data-cell total-employees">15</td>
+                    </tr>
+                    <tr class="dept-level-1">
+                        <td class="px-6 py-2">RF PD LineB</td>
+                        <td class="data-cell scanned-in">10</td>
+                        <td class="data-cell not-scanned-in">1</td>
+                        <td class="data-cell total-employees font-bold">11</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">LineB Admin</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">LineB Leader</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">Roll former B</td>
+                        <td class="data-cell scanned-in">5</td>
+                        <td class="data-cell not-scanned-in">1</td>
+                        <td class="data-cell total-employees">6</td>
+                    </tr>
+                    <tr class="dept-level-3">
+                        <td class="px-6 py-2">Inner Box B</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-3">
+                        <td class="px-6 py-2">Cab pre</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-3">
+                        <td class="px-6 py-2">Cabinet PU Foam B</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-3">
+                        <td class="px-6 py-2">Assembly B</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-3">
+                        <td class="px-6 py-2">System&Vac B</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-3">
+                        <td class="px-6 py-2">FinalPacking B</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="sub-section-total">
+                        <td class="px-6 py-2 text-right">Total for RF PD LineB:</td>
+                        <td class="data-cell scanned-in">13</td>
+                        <td class="data-cell not-scanned-in">1</td>
+                        <td class="data-cell total-employees">14</td>
+                    </tr>
+                    <tr class="dept-level-1">
+                        <td class="px-6 py-2">Door</td>
+                        <td class="data-cell scanned-in">5</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees font-bold">5</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">Door Leader</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-3">
+                        <td class="px-6 py-2">Door bending A</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-3">
+                        <td class="px-6 py-2">Door Backplate</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-3">
+                        <td class="px-6 py-2">Door forming A</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-3">
+                        <td class="px-6 py-2">Door bending B</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-3">
+                        <td class="px-6 py-2">Door forming B</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="sub-section-total">
+                        <td class="px-6 py-2 text-right">Total for Door:</td>
+                        <td class="data-cell scanned-in">6</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">6</td>
+                    </tr>
+                    <tr class="dept-level-1">
+                        <td class="px-6 py-2">RF IH</td>
+                        <td class="data-cell scanned-in">7</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees font-bold">7</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">RF IH TF Sup</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">RF IH TF Lead</td>
+                        <td class="data-cell scanned-in">3</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">3</td>
+                    </tr>
+                    <tr class="dept-level-3">
+                        <td class="px-6 py-2">RFIH TF Door</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-3">
+                        <td class="px-6 py-2">RF IH TF Inbox</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">RFIH ass'y Sup</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-3">
+                        <td class="px-6 py-2">RFIH ass'yLead</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-3">
+                        <td class="px-6 py-2">RFIH MC</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-3">
+                        <td class="px-6 py-2">RFIH Injection</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="sub-section-total">
+                        <td class="px-6 py-2 text-right">Total for RF IH:</td>
+                        <td class="data-cell scanned-in">12</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">12</td>
+                    </tr>
+                    <tr class="dept-level-1">
+                        <td class="px-6 py-2">RF PDS</td>
+                        <td class="data-cell scanned-in">7</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees font-bold">7</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">RF Planning</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">RF Order desk</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">RF FG WH</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-3">
+                        <td class="px-6 py-2">RFFG Sparepart</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">RF Purchasing</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">RF RM WH Mgr</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-3">
+                        <td class="px-6 py-2">RF RM WH</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="sub-section-total">
+                        <td class="px-6 py-2 text-right">Total for RF PDS:</td>
+                        <td class="data-cell scanned-in">7</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">7</td>
+                    </tr>
+                    <tr class="dept-level-1">
+                        <td class="px-6 py-2">RF Technical</td>
+                        <td class="data-cell scanned-in">2</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees font-bold">2</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">RF E&M MT</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">RF E&M Mold</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="sub-section-total">
+                        <td class="px-6 py-2 text-right">Total for RF Technical:</td>
+                        <td class="data-cell scanned-in">2</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">2</td>
+                    </tr>
+                    <tr class="dept-level-1">
+                        <td class="px-6 py-2">RF QA</td>
+                        <td class="data-cell scanned-in">6</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees font-bold">6</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">RF IQC</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">RF OQC</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">RF CS</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">RF PQC</td>
+                        <td class="data-cell scanned-in">4</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">4</td>
+                    </tr>
+                    <tr class="dept-level-3">
+                        <td class="px-6 py-2">RF PQC A</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-3">
+                        <td class="px-6 py-2">RF PQC B</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-3">
+                        <td class="px-6 py-2">RF PQC IH</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="sub-section-total">
+                        <td class="px-6 py-2 text-right">Total for RF QA:</td>
+                        <td class="data-cell scanned-in">9</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">9</td>
+                    </tr>
+                    <tr class="dept-level-1">
+                        <td class="px-6 py-2">RF ET</td>
+                        <td class="data-cell scanned-in">2</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees font-bold">2</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">RF Tooling&6S</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="sub-section-total">
+                        <td class="px-6 py-2 text-right">Total for RF ET:</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-1">
+                        <td class="px-6 py-2">RF NPI</td>
+                        <td class="data-cell scanned-in">2</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees font-bold">2</td>
+                    </tr>
+                    <tr class="dept-level-2">
+                        <td class="px-6 py-2">RF RD</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="sub-section-total">
+                        <td class="px-6 py-2 text-right">Total for RF NPI:</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="section-total">
+                        <td class="px-6 py-3 text-right text-lg">Total for RF EMC:</td>
+                        <td class="data-cell scanned-in text-xl">62</td>
+                        <td class="data-cell not-scanned-in text-xl">2</td>
+                        <td class="data-cell total-employees text-xl">64</td>
+                    </tr>
+
+                    <tr class="dept-level-0">
+                        <td colspan="4" class="px-4 py-3">FUL FILL</td>
+                    </tr>
+                    <tr class="dept-level-1">
+                        <td class="px-6 py-2">Spare</td>
+                        <td class="data-cell scanned-in">2</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees font-bold">2</td>
+                    </tr>
+                    <tr class="sub-section-total">
+                        <td class="px-6 py-2 text-right">Total for Spare:</td>
+                        <td class="data-cell scanned-in">2</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">2</td>
+                    </tr>
+                    <tr class="dept-level-1">
+                        <td class="px-6 py-2">Pregnant A</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees font-bold">1</td>
+                    </tr>
+                    <tr class="sub-section-total">
+                        <td class="px-6 py-2 text-right">Total for Pregnant A:</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-1">
+                        <td class="px-6 py-2">Spare RF FG</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees font-bold">1</td>
+                    </tr>
+                    <tr class="sub-section-total">
+                        <td class="px-6 py-2 text-right">Total for Spare RF FG:</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-1">
+                        <td class="px-6 py-2">RF Chinese</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees font-bold">1</td>
+                    </tr>
+                    <tr class="sub-section-total">
+                        <td class="px-6 py-2 text-right">Total for RF Chinese:</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="dept-level-1">
+                        <td class="px-6 py-2">Support Mgt.</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees font-bold">1</td>
+                    </tr>
+                    <tr class="sub-section-total">
+                        <td class="px-6 py-2 text-right">Total for Support Mgt.:</td>
+                        <td class="data-cell scanned-in">1</td>
+                        <td class="data-cell not-scanned-in">0</td>
+                        <td class="data-cell total-employees">1</td>
+                    </tr>
+                    <tr class="section-total">
+                        <td class="px-6 py-3 text-right text-lg">Total for FUL FILL:</td>
+                        <td class="data-cell scanned-in text-xl">6</td>
+                        <td class="data-cell not-scanned-in text-xl">0</td>
+                        <td class="data-cell total-employees text-xl">6</td>
+                    </tr>
+                </tbody>
+                <tfoot class="text-xs text-gray-700 uppercase bg-gray-100">
+                    <tr class="total-row">
+                        <th scope="row" class="px-6 py-3 text-right text-xl font-extrabold">Grand Total:</th>
+                        <td class="data-cell scanned-in text-2xl font-extrabold">194</td>
+                        <td class="data-cell not-scanned-in text-2xl font-extrabold">11</td>
+                        <td class="data-cell total-employees text-2xl font-extrabold">205</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+</body>
+</html>

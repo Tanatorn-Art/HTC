@@ -1,9 +1,10 @@
+//D:\สหกิจ\facescan\HTC\app\api\manpower\route.ts
 import {NextResponse} from 'next/server';
 import db from '@/services/db';
 
 export async function GET() {
     try {
-        const result = await db.query('SELECT * FROM public.vw_manpower_att_group');
+        const result = await db.query('SELECT * FROM public.vw_manpower_level');
         return NextResponse.json(result.rows);
     }catch (err) {
         console.error(err);
