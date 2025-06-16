@@ -12,7 +12,6 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const selectedDate = searchParams.get('date');
 
-  // ตรวจสอบความถูกต้องของวันที่
   if (!selectedDate || !/^\d{4}-\d{2}-\d{2}$/.test(selectedDate)) {
     return new Response(
       JSON.stringify({ error: 'รูปแบบวันที่ไม่ถูกต้อง โปรดใช้รูปแบบ ปี-เดือน-วัน (yyyy-mm-dd)' }),

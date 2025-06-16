@@ -13,7 +13,6 @@ type Filters = {
   employeeId: string;
 };
 
-// Key สำหรับเก็บ Filters ใน sessionStorage
 const SESSION_STORAGE_FILTERS_KEY = 'reportPageFilters';
 
 export default function ReportPage() {
@@ -29,7 +28,6 @@ export default function ReportPage() {
           return JSON.parse(savedFilters);
         } catch (e) {
           console.error('Failed to parse saved filters from sessionStorage:', e);
-          // Fallback ถ้า parse ไม่ได้
           return {
             date: new Date().toISOString().slice(0, 10),
             departmentId: '',
@@ -38,7 +36,6 @@ export default function ReportPage() {
         }
       }
     }
-    // ค่าเริ่มต้นถ้าไม่มีใน sessionStorage
     return {
       date: new Date().toISOString().slice(0, 10),
       departmentId: '',
@@ -106,9 +103,8 @@ export default function ReportPage() {
     }
 
     // *** เรียก fetchReportData ทันทีเมื่อ currentFilters เปลี่ยนแปลง ***
-    // รวมถึงตอนที่โหลด initial filters จาก sessionStorage ด้วย
     fetchReportData();
-  }, [currentFilters]); // Dependency array: fetch data เมื่อ currentFilters เปลี่ยนแปลง
+  }, [currentFilters]);
 
   const handleExportCSV = () => {
     if (records.length === 0) {
