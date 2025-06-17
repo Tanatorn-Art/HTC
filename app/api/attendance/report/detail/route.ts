@@ -25,10 +25,13 @@ export async function GET(req: NextRequest) {
       SELECT
         workdate,
         person_code,
+        deptcode,
         deptname,
         full_name,
+        department_full_paths,
         firstscantime,
         lastscantime,
+        shiftname,
         "PersonType"
       FROM public.vw_manpower_detail
       WHERE deptcode = $1
