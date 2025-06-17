@@ -49,7 +49,7 @@ export function ManpowerTable({ selectedDate, scanStatus, deptcodelevel1Filter }
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch(`/api/department?date=${selectedDate}`);
+        const response = await fetch('/api/department?date=${selectedDate}');
         if (!response.ok) {
           throw new Error('Failed to fetch employees');
         }
@@ -135,18 +135,18 @@ export function ManpowerTable({ selectedDate, scanStatus, deptcodelevel1Filter }
       <table className="min-w-full text-sm text-left border-collapse">
         <thead className="border-b text-gray-600">
           <tr>
-            <th className="py-2 px-6">รหัสแผนก</th>
-            <th className="py-2 px-6">ชื่อแผนก</th>
-            <th className="py-2 px-6">SBU</th>
-            <th className="py-2 px-6">STD</th>
+            <th className="py-2 px-6">deptcode</th>
+            <th className="py-2 px-6">Department</th>
+            <th className="py-2 px-6">Sbu</th>
+            <th className="py-2 px-6">Stda</th>
             {scanStatus !== 'not_scanned' && (
-                <th className="py-2 px-6">สแกนแล้ว</th>
+                <th className="py-2 px-6">Scan</th>
             )}
             {scanStatus !== 'scanned' && (
-                <th className="py-2 px-6">ยังไม่สแกน</th>
+                <th className="py-2 px-6">No Scan</th>
             )}
-            <th className="py-2 px-6">พนักงานทั้งหมด</th>
-            <th className="p-0">ดูรายละเอียด</th> 
+            <th className="py-2 px-6">Person</th>
+            <th className="p-0"></th> 
           </tr>
         </thead>
         <tbody>
@@ -154,7 +154,6 @@ export function ManpowerTable({ selectedDate, scanStatus, deptcodelevel1Filter }
             const linkDeptcode = dept.deptcode;
             const linkWorkdate = selectedDate; 
 
-            // *** เพิ่มฟังก์ชันนี้เพื่อบันทึก selectedDate ลง localStorage ก่อนคลิกลิงก์ ***
             const handleLinkClick = () => {
               if (typeof window !== 'undefined') { 
                 localStorage.setItem('prevDashboardDate', selectedDate);

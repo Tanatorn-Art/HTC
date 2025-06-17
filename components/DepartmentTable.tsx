@@ -15,9 +15,9 @@ export function DepartmentTable({ employees, scanStatus = 'all' }: DepartmentTab
       <table className="min-w-full text-sm text-left border-collapse">
         <thead className="border-b text-gray-600">
           <tr>
-            <th className="py-2 px-6">Work Date</th>
-            <th className="py-2 px-6">Dept. Code</th>
-            <th className="py-2 px-6">Dept. Name</th>
+            <th className="py-2 px-6">Workdate</th>
+            <th className="py-2 px-6">Deptcode</th>
+            <th className="py-2 px-6">Deptname</th>
             <th className="py-2 px-6">SBU</th>
             <th className="py-2 px-6">STD</th>
             {scanStatus !== 'not_scanned' && (

@@ -37,12 +37,8 @@ export default function ReportDetailPage() {
     const invalidWorkdate = !initialWorkdate || !isValidDate(initialWorkdate);
 
     if (invalidDept || invalidWorkdate) {
-      if (invalidDept) {
-        console.error('รหัสแผนกไม่ถูกต้อง:', deptcode);
-      }
-      if (invalidWorkdate) {
-        console.error('วันที่ไม่ถูกต้อง:', initialWorkdate);
-      }
+      if (invalidDept) console.error('รหัสแผนกไม่ถูกต้อง:', deptcode);
+      if (invalidWorkdate) console.error('วันที่ไม่ถูกต้อง:', initialWorkdate);
       return;
     }
 
@@ -78,9 +74,7 @@ export default function ReportDetailPage() {
     if (!isoString) return '-';
     try {
       const date = new Date(isoString);
-      if (isNaN(date.getTime())) {
-        return isoString.substring(0, 8);
-      }
+      if (isNaN(date.getTime())) return isoString.substring(0, 8);
       return date.toLocaleTimeString('th-TH', {
         hour: '2-digit',
         minute: '2-digit',
@@ -88,7 +82,6 @@ export default function ReportDetailPage() {
         hour12: false,
       });
     } catch {
-      console.error('Error formatting time:', isoString);
       return isoString.substring(0, 8) || '-';
     }
   };
@@ -145,26 +138,8 @@ export default function ReportDetailPage() {
     const overTime = new Date(`1970-01-01T${timePart}`);
     const threshold = new Date('1970-01-01T08:00:00');
 
-    if (overTime.getTime() > threshold.getTime()) {
-      return formatTime(time);
-    } else {
-      return '-';
-    }
+    return overTime > threshold ? formatTime(time) : '-';
   };
-
-  const invalidDept = !deptcode || deptcode === 'undefined' || deptcode === '';
-  const invalidWorkdate = !initialWorkdate || !isValidDate(initialWorkdate);
-
-  if (invalidDept) {
-    return (
-      <div className="p-6 text-red-600">
-        รหัสแผนกไม่ถูกต้อง หรือไม่พบข้อมูลสำหรับแผนกนี้
-      </div>
-    );
-  }
-  if (invalidWorkdate) {
-    return <div className="p-6 text-red-600">รูปแบบวันที่ไม่ถูกต้อง</div>;
-  }
 
   const notScannedDetails = details.filter((d) => !d.firstscantime);
   const scannedDetails = details.filter((d) => d.firstscantime);
@@ -176,6 +151,17 @@ export default function ReportDetailPage() {
     setRowsPerPage(Number(event.target.value));
   };
 
+  const invalidDept = !deptcode || deptcode === 'undefined' || deptcode === '';
+  const invalidWorkdate = !initialWorkdate || !isValidDate(initialWorkdate);
+
+  if (invalidDept) {
+    return <div className="p-6 text-red-600">รหัสแผนกไม่ถูกต้อง หรือไม่พบข้อมูลสำหรับแผนกนี้</div>;
+  }
+
+  if (invalidWorkdate) {
+    return <div className="p-6 text-red-600">รูปแบบวันที่ไม่ถูกต้อง</div>;
+  }
+
   return (
     <div className="p-6 space-y-6">
       <button
@@ -183,12 +169,10 @@ export default function ReportDetailPage() {
         className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-shadow shadow-md hover:shadow-lg"
       >
         <ArrowLeft className="w-5 h-5" />
-        <span>ย้อนกลับ</span>
+        <span>Back</span>
       </button>
 
-      <h1 className="text-2xl font-bold">
-        แผนก: {deptName} ({from})
-      </h1>
+      <h1 className="text-2xl font-bold">แผนก: {deptName} ({from})</h1>
 
       <div className="flex flex-wrap items-center gap-3">
         <input
@@ -202,20 +186,29 @@ export default function ReportDetailPage() {
         />
       </div>
 
-      <div className="flex gap-4">
-        <div className="flex-1 bg-blue-100 text-blue-900 p-4 rounded-xl shadow">
-          <div className="text-sm">รวมทั้งหมด</div>
-          <div className="text-xl font-bold">{details.length} คน</div>
-        </div>
-        <div className="flex-1 bg-green-100 text-green-900 p-4 rounded-xl shadow">
-          <div className="text-sm">สแกนแล้ว</div>
-          <div className="text-xl font-bold">{scannedDetails.length} คน</div>
-        </div>
-        <div className="flex-1 bg-red-100 text-red-900 p-4 rounded-xl shadow">
-          <div className="text-sm">ยังไม่สแกน</div>
-          <div className="text-xl font-bold">{notScannedDetails.length} คน</div>
-        </div>
-      </div>
+     <div className="flex gap-4 flex-wrap">
+  <div className="flex items-center gap-4 bg-blue-100 text-blue-900 p-4 rounded-xl shadow min-w-[200px] flex-1 max-w-[300px]">
+    <div className="text-left">
+      <div className="text-2xl font-extrabold">{details.length}</div>
+      <div className="text-base font-medium">Total</div>
+    </div>
+  </div>
+
+  <div className="flex items-center gap-4 bg-green-100 text-green-900 p-4 rounded-xl shadow min-w-[200px] flex-1 max-w-[300px]">
+    <div className="text-left">
+      <div className="text-2xl font-extrabold">{scannedDetails.length}</div>
+      <div className="text-base font-medium">Scan</div>
+    </div>
+  </div>
+
+  <div className="flex items-center gap-4 bg-red-100 text-red-900 p-4 rounded-xl shadow min-w-[200px] flex-1 max-w-[300px]">
+    <div className="text-left">
+      <div className="text-2xl font-extrabold">{notScannedDetails.length}</div>
+      <div className="text-base font-medium">No Scan</div>
+    </div>
+  </div>
+</div>
+
 
       {loading ? (
         <div className="flex justify-center py-10 text-gray-500 animate-spin">
@@ -226,12 +219,12 @@ export default function ReportDetailPage() {
           {notScannedDetails.length > 0 && (
             <>
               <h2 className="text-lg font-semibold mt-6">
-                ยังไม่สแกน ({notScannedDetails.length} คน)
+                No Scan ({notScannedDetails.length} คน)
               </h2>
               <table className="min-w-full bg-white rounded shadow text-sm mb-6">
                 <thead className="bg-red-100 text-left">
                   <tr>
-                    <th className="p-3">ชื่อ-สกุล</th>
+                    <th className="p-3">FullName</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -248,15 +241,15 @@ export default function ReportDetailPage() {
           {scannedDetails.length > 0 && (
             <>
               <h2 className="text-lg font-semibold mt-6">
-                สแกนแล้ว ({scannedDetails.length} คน)
+                Scan ({scannedDetails.length} คน)
               </h2>
               <table className="min-w-full bg-white rounded shadow text-sm">
                 <thead className="bg-green-100 text-left">
                   <tr>
-                    <th className="p-3">ชื่อ-สกุล</th>
-                    <th className="p-3">เวลาเข้า</th>
-                    <th className="p-3">เวลาออก</th>
-                    <th className="p-3">เข้างานสาย</th>
+                    <th className="p-3">FullName</th>
+                    <th className="p-3">Time In</th>
+                    <th className="p-3">Time Out</th>
+                    <th className="p-3">Over In</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -275,10 +268,7 @@ export default function ReportDetailPage() {
 
           {details.length > 0 && (
             <div className="flex flex-wrap items-center justify-center gap-4 mt-4">
-              <label
-                htmlFor="rows-per-page-bottom"
-                className="text-sm font-medium text-gray-700"
-              >
+              <label htmlFor="rows-per-page-bottom" className="text-sm font-medium text-gray-700">
                 select row :
               </label>
               <select

@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic'; 
-import AttendanceTextSummary from '@/components/AttendanceTextSummary';
 import AttendanceCardSummary from '@/components/AttendanceCardSummary';
 import { ManpowerTable } from '@/components/ManpowerTable'; 
 
@@ -71,13 +70,7 @@ export default function DashboardPage() {
 
       <section className="space-y-6">
         <h1 className="text-2xl font-semibold">ภาพรวมวันที่ {selectedDate}</h1>
-
-        <AttendanceTextSummary
-          date={selectedDate}
-          totalScanned={totalScanned}
-          totalNotScanned={totalNotScanned}
-        />
-
+        
         <AttendanceCardSummary
           totalScanned={totalScanned}
           totalNotScanned={totalNotScanned}
@@ -92,9 +85,8 @@ export default function DashboardPage() {
       <section className="space-y-4">
         <h1 className="text-xl font-semibold">Manpower Monitoring</h1>
         
-        {/* Dropdown สำหรับเลือกโรงงาน */}
         <div className="mb-4">
-          <label htmlFor="factorySelect" className="block text-gray-700 font-medium mb-2">เลือกโรงงาน:</label>
+          <label htmlFor="factorySelect" className="block text-gray-700 font-medium mb-2"></label>
           <select
             id="factorySelect"
             value={selectedFactory}

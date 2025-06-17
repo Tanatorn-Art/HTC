@@ -31,12 +31,11 @@ const ReportFilterForm = ({ onSearch, initialFilters }: Props) => {
     fetch('/api/manpower')
       .then(res => {
         if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`);
+          throw new Error('HTTP error! status: ${res.status}');
         }
         return res.json();
       })
       .then((data: ReportApiRawData[]) => { 
-        // *** บล็อกนี้เป็นบล็อกเดียวที่จำเป็นตามการตอบกลับของ API ของคุณ ***
         if (Array.isArray(data)) {
           const uniqueDepartments: DepartmentForDropdown[] = [];
           const seenDeptcodes = new Set<string>();
