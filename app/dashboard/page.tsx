@@ -83,24 +83,27 @@ export default function DashboardPage() {
       </section>
 
       <section className="space-y-4">
-        <h1 className="text-xl font-semibold">Manpower Monitoring</h1>
-        
-        <div className="mb-4">
-          <label htmlFor="factorySelect" className="block text-gray-700 font-medium mb-2"></label>
-          <select
-            id="factorySelect"
-            value={selectedFactory}
-            onChange={(e) => setSelectedFactory(e.target.value)}
-            className="mt-1 block border px-3 py-2 rounded-md shadow-sm focus:outline-none focus:ring focus:border-blue-300"
-          >
-            <option value="all">ทั้งหมด</option>
-            <option value="06">โรงงาน 1 ("06")</option>
-            <option value="07">โรงงาน 2 ("07")</option>
-            <option value="08">โรงงาน 3 ("08")</option> 
-          </select>
-        </div>
+        <div className="mb-4 flex justify-between items-center">
+  <h1 className="text-xl font-semibold">Manpower Monitoring</h1>
 
-        {/* แสดง ManpowerTable โดยส่ง deptcodelevel1Filter ตามที่ผู้ใช้เลือก */}
+  <div className="flex flex-col items-end text-right">
+    <label htmlFor="factorySelect" className="text-gray-700 font-semibold mb-1">
+      เลือกโรงงาน
+    </label>
+    <select
+      id="factorySelect"
+      value={selectedFactory}
+      onChange={(e) => setSelectedFactory(e.target.value)}
+      className="block border px-3 py-2 rounded-md shadow-sm focus:outline-none focus:ring focus:border-blue-300"
+    >
+      <option value="all">ทั้งหมด</option>
+      <option value="06">โรงงาน 1 ("06")</option>
+      <option value="07">โรงงาน 2 ("07")</option>
+      <option value="08">โรงงาน 3 ("08")</option>
+    </select>
+  </div>
+</div>
+
         <ManpowerTable 
           selectedDate={selectedDate} 
           scanStatus="" 
