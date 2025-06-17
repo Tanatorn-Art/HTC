@@ -58,8 +58,8 @@ export default function ReportDetailPage() {
         const data = await res.json();
         setDetails(data.detil || []);
         setDeptName(data.deptname || 'ไม่พบชื่อแผนก');
-      } catch {
-        console.error('เกิดข้อผิดพลาด');
+      } catch (err) {
+        console.error('เกิดข้อผิดพลาด:', err);
         setDetails([]);
         setDeptName('เกิดข้อผิดพลาด');
       } finally {
@@ -92,7 +92,7 @@ export default function ReportDetailPage() {
       return;
     }
 
-    const headers = ['ชื่อ-สกุล', 'เวลาเข้า', 'เวลาออก', 'เข้างานสาย'];
+    const headers = ['ชื่อ-สกุล', 'เวลาเข้า', 'เวลาออก', 'over-in'];
     const rows = details.map((d) => [
       d.full_name,
       formatTime(d.firstscantime),
@@ -115,7 +115,7 @@ export default function ReportDetailPage() {
 
   const getOverIn = (time: string | null) => {
     if (!time) return null;
-
+    
     let timePart = '';
     try {
       const dateObj = new Date(time);
@@ -273,7 +273,7 @@ export default function ReportDetailPage() {
               </label>
               <select
                 id="rows-per-page-bottom"
-                value={rowsPerPage}
+                value={rowsPerPage} 
                 onChange={handleRowsPerPageChange}
                 className="border border-slate-300 px-2 py-1 rounded"
               >

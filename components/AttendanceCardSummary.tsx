@@ -16,6 +16,7 @@ const AttendanceCardSummary = ({ totalScanned, totalNotScanned }: Props) => {
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 items-stretch">
 
+        {/* Total */}
         <div
           onMouseEnter={() => setHovered('total')}
           onMouseLeave={() => setHovered(null)}
@@ -51,6 +52,7 @@ const AttendanceCardSummary = ({ totalScanned, totalNotScanned }: Props) => {
           )}
         </div>
 
+        {/* Not Scanned */}
         <div
           onMouseEnter={() => setHovered('not_scanned')}
           onMouseLeave={() => setHovered(null)}

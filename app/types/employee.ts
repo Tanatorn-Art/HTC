@@ -1,3 +1,4 @@
+// app/types/employee.ts
 export type Employee = {
   employeeId: string;
   groupid: string;

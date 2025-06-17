@@ -94,12 +94,13 @@ export default function DashboardPage() {
             className="mt-1 block border px-3 py-2 rounded-md shadow-sm focus:outline-none focus:ring focus:border-blue-300"
           >
             <option value="all">ทั้งหมด</option>
-            <option value="06">โรงงาน 1 (&quot;06&quot;)</option>
-            <option value="07">โรงงาน 2 (&quot;07&quot;)</option>
-            <option value="08">โรงงาน 3 (&quot;08&quot;)</option> 
+            <option value="06">โรงงาน 1 ("06")</option>
+            <option value="07">โรงงาน 2 ("07")</option>
+            <option value="08">โรงงาน 3 ("08")</option> 
           </select>
         </div>
 
+        {/* แสดง ManpowerTable โดยส่ง deptcodelevel1Filter ตามที่ผู้ใช้เลือก */}
         <ManpowerTable 
           selectedDate={selectedDate} 
           scanStatus="" 
