@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { PiSpinnerGapBold } from 'react-icons/pi';
 import { ArrowLeft } from 'lucide-react';
+import { FaCheckCircle, FaExclamationCircle, FaUsers } from 'react-icons/fa';
 
 type Detail = {
   person_code: string;
@@ -29,7 +30,7 @@ export default function ReportDetailPage() {
   const [details, setDetails] = useState<Detail[]>([]);
   const [deptName, setDeptName] = useState('');
   const [loading, setLoading] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [hovered, setHovered] = useState<string | null>(null);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const isValidDate = (dateStr: string) =>
@@ -185,14 +186,14 @@ export default function ReportDetailPage() {
         className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-shadow shadow-md hover:shadow-lg"
       >
         <ArrowLeft className="w-5 h-5" />
-        <span>ย้อนกลับ</span>
+        <span>Back</span>
       </button>
 
       <h1 className="text-2xl font-bold">แผนก: {deptName}</h1>
 
       <div className="flex flex-wrap items-center gap-3">
         <label className="flex flex-col items-start">
-          <span className="text-gray-700 text-sm font-medium mb-1">จากวันที่:</span>
+          <span className="text-gray-700 text-sm font-medium mb-1">From:</span>
           <input
             type="date"
             value={from}
@@ -201,7 +202,7 @@ export default function ReportDetailPage() {
           />
         </label>
         <label className="flex flex-col items-start">
-          <span className="text-gray-700 text-sm font-medium mb-1">ถึงวันที่:</span>
+          <span className="text-gray-700 text-sm font-medium mb-1">To:</span>
           <input
             type="date"
             value={to}
@@ -211,20 +212,40 @@ export default function ReportDetailPage() {
         </label>
       </div>
 
-      <div className="flex gap-4">
-        <div className="flex-1 bg-blue-100 text-blue-900 p-4 rounded-xl shadow">
-          <div className="text-sm">รวมทั้งหมด</div>
-          <div className="text-xl font-bold">{details.length} คน</div>
-        </div>
-        <div className="flex-1 bg-green-100 text-green-900 p-4 rounded-xl shadow">
-          <div className="text-sm">สแกนแล้ว</div>
-          <div className="text-xl font-bold">{scannedDetails.length} คน</div>
-        </div>
-        <div className="flex-1 bg-red-100 text-red-900 p-4 rounded-xl shadow">
-          <div className="text-sm">ยังไม่สแกน</div>
-          <div className="text-xl font-bold">{notScannedDetails.length} คน</div>
-        </div>
+     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 items-stretch">
+  {/* Total */}
+  <div className="flex flex-col items-center justify-center bg-blue-100 text-blue-800 px-6 py-5 rounded-2xl shadow-md h-full">
+    <div className="flex items-center gap-4">
+      <FaUsers size={36} />
+      <div className="text-left">
+        <div className="text-2xl font-extrabold">{details.length}</div>
+        <div className="text-base text-blue-900 font-medium">Total</div>
       </div>
+    </div>
+  </div>
+
+  {/* Scanned */}
+  <div className="flex flex-col items-center justify-center bg-green-100 text-green-800 px-6 py-5 rounded-2xl shadow-md h-full">
+    <div className="flex items-center gap-4">
+      <FaCheckCircle size={36} />
+      <div className="text-left">
+        <div className="text-2xl font-extrabold">{scannedDetails.length}</div>
+        <div className="text-base text-green-900 font-medium">Scan</div>
+      </div>
+    </div>
+  </div>
+
+  {/* Not Scanned */}
+  <div className="flex flex-col items-center justify-center bg-red-100 text-red-800 px-6 py-5 rounded-2xl shadow-md h-full">
+    <div className="flex items-center gap-4">
+      <FaExclamationCircle size={36} />
+      <div className="text-left">
+        <div className="text-2xl font-extrabold">{notScannedDetails.length}</div>
+        <div className="text-base text-red-900 font-medium">No Scan</div>
+      </div>
+    </div>
+  </div>
+</div>
 
       {loading ? (
         <div className="flex justify-center py-10 text-gray-500 animate-spin">
@@ -234,7 +255,7 @@ export default function ReportDetailPage() {
         <>
           {notScannedDetails.length > 0 && (
             <>
-              <h2 className="text-lg font-semibold mt-6">ยังไม่สแกน ({notScannedDetails.length} คน)</h2>
+              <h2 className="text-lg font-semibold mt-6">No Scan</h2>
               <table className="min-w-full bg-white rounded shadow text-sm mb-6">
                 <thead className="bg-red-100 text-left">
                   <tr>
@@ -272,7 +293,7 @@ export default function ReportDetailPage() {
 
           {scannedDetails.length > 0 && (
             <>
-              <h2 className="text-lg font-semibold mt-6">สแกนแล้ว ({scannedDetails.length} คน)</h2>
+              <h2 className="text-lg font-semibold mt-6">Scan</h2>
               <table className="min-w-full bg-white rounded shadow text-sm">
                 <thead className="bg-green-100 text-left">
                   <tr>
