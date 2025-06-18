@@ -47,7 +47,6 @@ type AggregatedDepartment = {
 
 
 const getDeptLevel = (dept: AggregatedDepartment): number => {
-  const level1 = dept.deptcodelevel1;
   const level2 = dept.deptcodelevel2;
   const level3 = dept.deptcodelevel3;
   const level4 = dept.deptcodelevel4;
@@ -191,7 +190,7 @@ export function ManpowerTable({ selectedDate, scanStatus, deptcodelevel1Filter }
           </tr>
         </thead>
         <tbody>
-          {filteredDepartments.map((dept, index) => {
+          {filteredDepartments.map((dept) => {
             const linkDeptcode = dept.deptcode;
             const linkWorkdate = selectedDate;
 

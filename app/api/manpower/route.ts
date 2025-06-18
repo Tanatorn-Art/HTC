@@ -3,7 +3,7 @@ import db from '@/services/db';
 
 export async function GET() {
     try {
-        const result = await db.query('SELECT * FROM public.vw_manpower_att_group');
+        const result = await db.query('SELECT * FROM public.vw_manpower');
         return NextResponse.json(result.rows);
     }catch (err) {
         console.error(err);

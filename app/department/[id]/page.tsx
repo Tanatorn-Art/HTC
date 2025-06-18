@@ -24,12 +24,10 @@ export default function DepartmentDetailPage() {
 
         if (!res.ok) {
           notFound();
-          return;
         }
 
         const data = await res.json();
 
-        // แปลง raw data เป็น Employee type
         const employees: Employee[] = (data.employees as ReportApiRawData[]).map((emp) => ({
           employeeId: emp.employeeId ?? '',
           groupid: emp.groupid ?? '',
@@ -38,11 +36,18 @@ export default function DepartmentDetailPage() {
           deptcode: emp.deptcode ?? '',
           deptname: emp.deptname ?? '',
           deptsbu: emp.deptsbu ?? '',
-          deptstd: emp.deptstd ?? '',
+          deptstd: emp.deptstd ?? null,
           countscan: Number(emp.countscan ?? 0),
           countnotscan: Number(emp.countnotscan ?? 0),
           countperson: Number(emp.countperson ?? 0),
-          late: emp.late !== undefined ? Number(emp.late) : undefined,
+          late: emp.late !== undefined ? Number(emp.late) : 0,
+          factoryCode: '', // No mapping in ReportApiRawData, set as empty string
+          factoryName: '',
+          mainDepartmentCode: '',
+          mainDepartmentName: '',
+          subDepartmentCode: '',
+          subDepartmentName: '',
+          originalFullDeptcode: emp.deptcode ?? '',
         }));
 
         setDepartment({ name: data.name, employees });

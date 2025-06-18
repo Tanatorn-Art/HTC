@@ -30,7 +30,6 @@ export default function ReportDetailPage() {
   const [details, setDetails] = useState<Detail[]>([]);
   const [deptName, setDeptName] = useState('');
   const [loading, setLoading] = useState(false);
-  const [hovered, setHovered] = useState<string | null>(null);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const isValidDate = (dateStr: string) =>
@@ -97,8 +96,8 @@ export default function ReportDetailPage() {
         return isoString.substring(0, 8);
       }
       return date.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
-    } catch (e) {
-      console.error('Error formatting time:', isoString, e);
+    } catch {
+      console.error('Error formatting time:', isoString);
       return isoString.substring(0, 8) || '-';
     }
   };
@@ -142,7 +141,7 @@ export default function ReportDetailPage() {
         timePart = time.substring(0, 8);
         if (timePart.length < 8) timePart += ':00';
       }
-    } catch (e) {
+    } catch {
       timePart = time.substring(0, 8);
       if (timePart.length < 8) timePart += ':00';
     }
